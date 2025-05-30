@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Ended!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        .thank-you-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+        }
+        .thank-you-card h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .thank-you-card p {
+            font-size: 16px;
+            color: #555;
+        }
+        .watermark {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+        }
+        .watermark a {
+            color: white;
+            text-decoration: none;
+        }
+        .watermark a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <video class="video-bg" autoplay loop muted>
+        <source src="Confetti.mp4" type="video/mp4">
+    </video>
+
+    <div class="thank-you-card">
+        <h1>Thank You!</h1>
+        <p>We appreciate your participation in the test. Your effort means a lot!</p>
+    </div>
+
+    <div class="watermark">
+        <a href="https://www.freepik.com/free-video/white-confetti-falling_3110358#fromView=search&page=1&position=7&uuid=1fa052d7-00e4-495d-aeaa-52a98854015a" target="_blank">
+            Video by Wavebreak Media
+        </a>
+    </div>
+</body>
+</html>

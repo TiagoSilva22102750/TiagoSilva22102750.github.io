@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mini-VLAT</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pqina/flip@latest/dist/flip.min.css">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: Arial, sans-serif;
+            }
+            body, html {
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+            }
+
+            .thank-you-card {
+                background: rgba(255, 255, 255, 0.9);
+                padding: 20px 30px;
+                border-radius: 10px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+                max-width: 600px;
+            }
+            .thank-you-card h1 {
+                font-size: 24px;
+                color: #333;
+                margin-bottom: 10px;
+            }
+            .thank-you-card p {
+                font-size: 16px;
+                color: #555;
+                text-align: justify;
+            }
+
+            .thank-you-card li {
+                font-size: 16px;
+                color: #555;
+                text-align: justify;
+            }
+
+            .flip-timer {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 50px;
+                margin: 20px;
+            }
+
+            .flip-timer .tick {
+                font-size: 50px;
+            }
+
+            .flip-timer .tick-credits {
+                display: none;
+            }
+        </style>
+        <script src="intermediate.js"></script>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@pqina/flip@latest/dist/flip.min.js"></script>
+    </head>
+    <body onload="startMiniVLAT()">
+        <div>
+            <div class="flip-timer" id="timer">
+                <div class="tick" data-value="3" data-view="flip"></div>
+                <div class="tick" data-value="0" data-view="flip"></div>
+            </div>
+
+            <div class="thank-you-card">
+                <h1>You have concluded the first part of the study.</h1>
+                <br>
+                <p>We appreciate your participation in this part.</p>
+                <p>In 30 seconds, a Mini-VLAT will start. It is a brief practical visualization literacy assessment test.</p>
+                <p>Bellow you will find the rules:</p>
+                <br>
+                <ol>
+                    <li>There will be a total of 12 different questions.</li>
+                    <li>Each question will not take more than 25 seconds to complete</li>
+                    <li>If you are unsure of the answer, skip it.</li>
+                </ol>
+            </div>
+        </div>
+    </body>
+</html>
