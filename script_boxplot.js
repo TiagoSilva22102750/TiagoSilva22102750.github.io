@@ -1,219 +1,477 @@
-// Define margin and dimensions for the scatterplot
-const margin = { top: 20, right: 20, bottom: 50, left: 50 }; // Increased bottom margin for axis labels
-const width = 1000 - margin.left - margin.right;
-const height = 650 - margin.top - margin.bottom;
+const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+const size = 650;
+const width = size - margin.left - margin.right;
+const height = size - margin.top - margin.bottom;
 
-// Function to start the dashboard
+const files = ["top/data_0,0000_normal_narrow_equidistant_top.csv", "top/data_0,0000_xtreme_narrow_equidistant_top.csv",
+"top/data_0,2500_normal_narrow_equidistant_top.csv", "top/data_0,2500_xtreme_narrow_equidistant_top.csv",
+"top/data_0,5000_normal_narrow_equidistant_top.csv", "top/data_0,5000_xtreme_narrow_equidistant_top.csv",
+"top/data_0,7500_normal_narrow_equidistant_top.csv", "top/data_0,7500_xtreme_narrow_equidistant_top.csv",
+"top/data_-0,2500_normal_narrow_equidistant_top.csv", "top/data_-0,2500_xtreme_narrow_equidistant_top.csv",
+"top/data_-0,5000_normal_narrow_equidistant_top.csv", "top/data_-0,5000_xtreme_narrow_equidistant_top.csv",
+"top/data_-0,7500_normal_narrow_equidistant_top.csv", "top/data_-0,7500_xtreme_narrow_equidistant_top.csv",
+"bottom/data_0,0000_normal_narrow_equidistant_bottom.csv", "bottom/data_0,0000_xtreme_narrow_equidistant_bottom.csv",
+"bottom/data_0,2500_normal_narrow_equidistant_bottom.csv", "bottom/data_0,2500_xtreme_narrow_equidistant_bottom.csv",
+"bottom/data_0,5000_normal_narrow_equidistant_bottom.csv", "bottom/data_0,5000_xtreme_narrow_equidistant_bottom.csv",
+"bottom/data_0,7500_normal_narrow_equidistant_bottom.csv", "bottom/data_0,7500_xtreme_narrow_equidistant_bottom.csv",
+"bottom/data_-0,2500_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,2500_xtreme_narrow_equidistant_bottom.csv",
+"bottom/data_-0,5000_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,5000_xtreme_narrow_equidistant_bottom.csv",
+"bottom/data_-0,7500_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,7500_xtreme_narrow_equidistant_bottom.csv"];
+
+const attentionCheckFiles = ["attention-checks/data_0,7500_xtreme_narrow_uniform_top.csv",
+"attention-checks/data_-0,7500_xtreme_narrow_uniform_bellow.csv"]
+
+let currentIndex = 0;
+let scatterplotData = [];
+let timer;
+let visibilityCount = 0;
+let testEnded = false;
+//let hoverCount = 0;
+let hoveredPoints = [];
+let interactionLog = [];
+let slope = 0.00;
+let countdownTime = 0;
+let startTime = 0.0;
+let timespent = 0.0;
+
 function startDashboard() {
-  // Helper function to load a CSV file
   function loadCSV(file) {
     return d3.csv(file);
   }
 
-  // File names for the CSV files
-  const file1 = "data--0043.csv"; // Main data
-  const file2 = "";  // Normal Outliers data
-  const file3 = "extreme-outliers-round-one-spot.csv";  // Extreme Outliers data
+  Promise.all(files.map(loadCSV)).then(mainDataArray => {
+    // Parse and convert strings to numbers
+    mainDataArray = mainDataArray.map(data => {
+      data.forEach(d => {
+        d.x = +d.x;
+        d.y = +d.y;
+      });
+      return data;
+    });
 
-  // Load both files and process the data
-  Promise.all([loadCSV(file1), loadCSV(file2), loadCSV(file3)])
-    .then(([data1, data2, data3]) => {
-      // Parse the data from both files to ensure numeric values for x and y
-      data1.forEach(d => {
-        d.x = +d.x; // Convert to numeric
-        d.y = +d.y; // Convert to numeric
-      });
-      data2.forEach(d => {
-        d.x = +d.x; // Convert to numeric
-        d.y = +d.y; // Convert to numeric
-      });
-      data3.forEach(d => {
-        d.x = +d.x; // Convert to numeric
-        d.y = +d.y; // Convert to numeric
+    // Shuffle main data
+    mainDataArray = mainDataArray.sort(() => Math.random() - 0.5);
+
+    // Load attention check files
+    Promise.all(attentionCheckFiles.map(loadCSV)).then(attentionDataArray => {
+      attentionDataArray = attentionDataArray.map(data => {
+        data.forEach(d => {
+          d.x = +d.x;
+          d.y = +d.y;
+        });
+        return data;
       });
 
-      // Call the function to create the scatterplot with the two datasets
-      startScatterplot(data1, data2, data3);
-    })
-    .catch(error => console.error("Error loading the CSV files:", error));
+      const oneThirdIndex = Math.floor(mainDataArray.length / 3);
+      const twoThirdIndex = Math.floor((mainDataArray.length * 2) / 3) + 1; // +1 to account for earlier insertion
+
+      scatterplotData = [
+        ...mainDataArray.slice(0, oneThirdIndex).map(d => ({ data: d, type: "main" })),
+        { data: attentionDataArray[0], type: "attentiontop" },
+        ...mainDataArray.slice(oneThirdIndex, twoThirdIndex).map(d => ({ data: d, type: "main" })),
+        { data: attentionDataArray[1], type: "attentionbottom" },
+        ...mainDataArray.slice(twoThirdIndex).map(d => ({ data: d, type: "main" }))
+      ];
+
+      renderScatterplot(currentIndex);
+    });
+  }).catch(error => console.error("Error loading CSV files:", error));
 }
 
-// Function to calculate boxplot statistics
-function calculateBoxplotStats(data, valueAccessor) {
-  const sorted = data.map(valueAccessor).sort(d3.ascending);
-  const q1 = d3.quantile(sorted, 0.25);
-  const median = d3.quantile(sorted, 0.5);
-  const q3 = d3.quantile(sorted, 0.75);
-  const iqr = q3 - q1;
-  const lowerWhisker = d3.max([d3.min(sorted), q1 - 1.5 * iqr]);
-  const upperWhisker = d3.min([d3.max(sorted), q3 + 1.5 * iqr]);
+function updateProgressBar() {
+    let totalSteps = scatterplotData.length;
+    let currentStep = currentIndex + 1;
 
-  return { q1, median, q3, lowerWhisker, upperWhisker };
+    let progress = (currentStep / totalSteps) * 100;
+    d3.select("#progressBar").style("width", progress + "%");
+    d3.select("#progressText").text(`${currentStep}/${totalSteps}`);
+    /*
+    let progress = ((currentIndex + 1) / scatterplotData.length) * 100;
+    d3.select("#progressBar").style("width", progress + "%");
+    d3.select("#progressText").text(Math.round(progress) + "%");
+    */
 }
 
-// Function to identify outliers based on boxplot statistics
-function identifyOutliers(data, xStats, yStats) {
-  return data.filter(d => {
-    // Check if x and y are outliers based on the boxplot whiskers
-    return (
-      d.x < xStats.lowerWhisker || d.x > xStats.upperWhisker ||
-      d.y < yStats.lowerWhisker || d.y > yStats.upperWhisker
-    );
-  });
+/*
+function updateHoverDisplay() {
+  console.log(`Total Hovers: ${hoverCount}`);
+  console.log("Hovered Points:", hoveredPoints);
 }
+*/
 
-// Function to create the scatterplot
-function startScatterplot(data1, data2, data3) {
-  // Set up the SVG element for the scatterplot
-  const svg = d3
-    .select("#scatterPlot")
+function renderScatterplot(index) {
+  startTime = performance.now();
+
+  if (testEnded) {
+    alert("The test has ended because you switched tabs or minimized the window too many times.");
+    return;
+  }
+
+  d3.select("#scatterPlot").selectAll("*").remove();
+  updateProgressBar();
+
+  const data = scatterplotData[index].data;
+  const svg = d3.select("#scatterPlot")
     .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", width + margin.left + margin.right + 50)  // Extra space for boxplots
+    .attr("height", height + margin.top + margin.bottom + 50)
     .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+    .attr("transform", `translate(${margin.left + 60},${margin.top})`);  // Shift right for y boxplot
 
-  // Set domain for both axes
-  const xScale = d3
-    .scaleLinear()
-    .domain([-7, d3.max(data1, d => d.x) + 10])
+  const xMax = Math.max(Math.abs(d3.min(data, d => d.x)), Math.abs(d3.max(data, d => d.x)));
+  const xScale = d3.scaleLinear()
+    .domain([-xMax, xMax])  // Center the X axis at 0
     .range([0, width]);
 
-  const yScale = d3
-    .scaleLinear()
-    .domain([d3.min(data1, d => d.y) - 10, d3.max(data1, d => d.y) + 10])
+  const yMin = d3.min(data, d => d.y);
+  const yMax = d3.max(data, d => d.y);
+  const yScale = d3.scaleLinear()
+    .domain([yMin - 10, yMax + 10])
     .range([height, 0]);
 
-  // Plot data1 (Main dataset)
-  svg.selectAll(".circle1")
-    .data(data1)
+  // Axes without ticks (you had them hidden)
+  const xAxis = d3.axisBottom(xScale).tickSize(0).tickFormat('');
+  const yAxis = d3.axisLeft(yScale).tickSize(0).tickFormat('');
+
+  // Add X axis
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(xAxis);
+
+  // Add Y axis
+  svg.append("g")
+    .call(yAxis);
+
+  // Scatter plot points
+  svg.selectAll(".circle")
+    .data(data)
     .enter()
     .append("circle")
-    .attr("class", "circle1")
     .attr("cx", d => xScale(d.x))
     .attr("cy", d => yScale(d.y))
     .attr("r", 3)
     .attr("fill", "steelblue")
     .attr("stroke", "black")
-    .append("title")
-    .text(d => `x: ${d.x.toFixed(2)}, y: ${d.y.toFixed(2)}`);
+    .on("mouseover", function (event, d) {
+      timespent = ((performance.now() - startTime) / 1000).toFixed(3);
+      hoveredPoints.push({ x: d.x, y: d.y, timespent: timespent });
+      interactionLog.push({ type: "hover", scatterplot: files[currentIndex], x: d.x, y: d.y, timespent: timespent });
+    });
 
-  // Plot data3 (Extreme outliers) - Outliers data
-  svg.selectAll(".circle3")
-    .data(data3)
+  // Draw bounding axis lines
+  svg.append("line")
+    .attr("x1", 0)
+    .attr("y1", height)
+    .attr("x2", width)
+    .attr("y2", height)
+    .attr("stroke", "black");
+
+  svg.append("line")
+    .attr("x1", 0)
+    .attr("y1", 0)
+    .attr("x2", 0)
+    .attr("y2", height)
+    .attr("stroke", "black");
+
+  // Boxplot parameters
+  const boxplotHeight = 40;  // height for boxplot below x-axis
+  const boxplotWidth = 40;   // width for boxplot left of y-axis
+  const boxplotMargin = 10;
+
+  // --- Helper function to calculate boxplot stats ---
+  function boxplotStats(values) {
+    values = values.slice().sort(d3.ascending);
+    const q1 = d3.quantile(values, 0.25);
+    const median = d3.quantile(values, 0.5);
+    const q3 = d3.quantile(values, 0.75);
+    const iqr = q3 - q1;
+    const lowerFence = q1 - 1.5 * iqr;
+    const upperFence = q3 + 1.5 * iqr;
+
+    const outliers = values.filter(v => v < lowerFence || v > upperFence);
+    const nonOutliers = values.filter(v => v >= lowerFence && v <= upperFence);
+
+    const min = d3.min(nonOutliers);
+    const max = d3.max(nonOutliers);
+
+    return { q1, median, q3, iqr, lowerFence, upperFence, min, max, outliers };
+  }
+
+  // --- Boxplot for X values under the x axis ---
+  const xValues = data.map(d => d.x);
+  const xStats = boxplotStats(xValues);
+
+  // Group for x boxplot (below x axis)
+  const xBoxplot = svg.append("g")
+    .attr("transform", `translate(0, ${height + boxplotMargin})`);
+
+  // Scale for x boxplot (horizontal)
+  const xBoxScale = xScale;
+
+  // Vertical scale for boxplot (small fixed height)
+  const yBoxScale = d3.scaleLinear()
+    .domain([0, 1])
+    .range([boxplotHeight, 0]);
+
+  // Draw box for IQR
+  xBoxplot.append("rect")
+    .attr("x", xBoxScale(xStats.q1))
+    .attr("y", 0)
+    .attr("width", xBoxScale(xStats.q3) - xBoxScale(xStats.q1))
+    .attr("height", boxplotHeight)
+    .attr("fill", "#ccc")
+    .attr("stroke", "black");
+
+  // Median line
+  xBoxplot.append("line")
+    .attr("x1", xBoxScale(xStats.median))
+    .attr("x2", xBoxScale(xStats.median))
+    .attr("y1", 0)
+    .attr("y2", boxplotHeight)
+    .attr("stroke", "black")
+    .attr("stroke-width", 2);
+
+  // Whiskers
+  xBoxplot.append("line")  // lower whisker
+    .attr("x1", xBoxScale(xStats.min))
+    .attr("x2", xBoxScale(xStats.q1))
+    .attr("y1", boxplotHeight / 2)
+    .attr("y2", boxplotHeight / 2)
+    .attr("stroke", "black");
+
+  xBoxplot.append("line")  // upper whisker
+    .attr("x1", xBoxScale(xStats.q3))
+    .attr("x2", xBoxScale(xStats.max))
+    .attr("y1", boxplotHeight / 2)
+    .attr("y2", boxplotHeight / 2)
+    .attr("stroke", "black");
+
+  // Whisker caps
+  xBoxplot.append("line")
+    .attr("x1", xBoxScale(xStats.min))
+    .attr("x2", xBoxScale(xStats.min))
+    .attr("y1", boxplotHeight / 4)
+    .attr("y2", (boxplotHeight / 4) * 3)
+    .attr("stroke", "black");
+
+  xBoxplot.append("line")
+    .attr("x1", xBoxScale(xStats.max))
+    .attr("x2", xBoxScale(xStats.max))
+    .attr("y1", boxplotHeight / 4)
+    .attr("y2", (boxplotHeight / 4) * 3)
+    .attr("stroke", "black");
+
+  // Outliers as circles
+  xBoxplot.selectAll(".outlier")
+    .data(xStats.outliers)
     .enter()
     .append("circle")
-    .attr("class", "circle3")
-    .attr("cx", d => xScale(d.x))
-    .attr("cy", d => yScale(d.y))
-    .attr("r", 4)
+    .attr("cx", d => xBoxScale(d))
+    .attr("cy", boxplotHeight / 2)
+    .attr("r", 3)
+    .attr("fill", "red")
+    .attr("stroke", "black");
+
+  // --- Boxplot for Y values left of y axis ---
+  const yValues = data.map(d => d.y);
+  const yStats = boxplotStats(yValues);
+
+  // Group for y boxplot (left of y axis)
+  const yBoxplot = svg.append("g")
+    .attr("transform", `translate(${-boxplotWidth - boxplotMargin}, 0)`);
+
+  // Vertical scale for y boxplot
+  const yBoxScaleY = d3.scaleLinear()
+    .domain([yMin - 10, yMax + 10])
+    .range([height, 0]);
+
+  // Horizontal scale for boxplot width
+  const xBoxScaleY = d3.scaleLinear()
+    .domain([0, 1])
+    .range([0, boxplotWidth]);
+
+  // Draw box for IQR (horizontal orientation)
+  yBoxplot.append("rect")
+    .attr("x", 0)
+    .attr("y", yBoxScaleY(yStats.q3))
+    .attr("width", boxplotWidth)
+    .attr("height", yBoxScaleY(yStats.q1) - yBoxScaleY(yStats.q3))
+    .attr("fill", "#ccc")
+    .attr("stroke", "black");
+
+  // Median line
+  yBoxplot.append("line")
+    .attr("x1", 0)
+    .attr("x2", boxplotWidth)
+    .attr("y1", yBoxScaleY(yStats.median))
+    .attr("y2", yBoxScaleY(yStats.median))
+    .attr("stroke", "black")
+    .attr("stroke-width", 2);
+
+  // Whiskers
+  yBoxplot.append("line")  // lower whisker
+    .attr("x1", boxplotWidth / 2)
+    .attr("x2", boxplotWidth / 2)
+    .attr("y1", yBoxScaleY(yStats.min))
+    .attr("y2", yBoxScaleY(yStats.q1))
+    .attr("stroke", "black");
+
+  yBoxplot.append("line")  // upper whisker
+    .attr("x1", boxplotWidth / 2)
+    .attr("x2", boxplotWidth / 2)
+    .attr("y1", yBoxScaleY(yStats.q3))
+    .attr("y2", yBoxScaleY(yStats.max))
+    .attr("stroke", "black");
+
+  // Whisker caps
+  yBoxplot.append("line")
+    .attr("x1", boxplotWidth / 4)
+    .attr("x2", (boxplotWidth / 4) * 3)
+    .attr("y1", yBoxScaleY(yStats.min))
+    .attr("y2", yBoxScaleY(yStats.min))
+    .attr("stroke", "black");
+
+  yBoxplot.append("line")
+    .attr("x1", boxplotWidth / 4)
+    .attr("x2", (boxplotWidth / 4) * 3)
+    .attr("y1", yBoxScaleY(yStats.max))
+    .attr("y2", yBoxScaleY(yStats.max))
+    .attr("stroke", "black");
+
+  // Outliers as circles
+  yBoxplot.selectAll(".outlier")
+    .data(yStats.outliers)
+    .enter()
+    .append("circle")
+    .attr("cy", d => yBoxScaleY(d))
+    .attr("cx", boxplotWidth / 2)
+    .attr("r", 3)
     .attr("fill", "red")
     .attr("stroke", "black")
-    .append("title")
-    .text(d => `x: ${d.x.toFixed(2)}, y: ${d.y.toFixed(2)}`);
 
-  // Calculate boxplot statistics for X and Y from file1
-  const xStats = calculateBoxplotStats(data1, d => d.x);
-  const yStats = calculateBoxplotStats(data1, d => d.y);
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .button-container {
+     display: flex;
+     justify-content: center;
+    }
 
-  // Identify outliers from file3 based on boxplot stats of file1
-  const outliers = identifyOutliers(data3, xStats, yStats);
+    .next-btn {
+     background: linear-gradient(135deg, #007BFF, #0056b3);
+     color: white;
+     font-size: 18px;
+     padding: 12px 24px;
+     border: none;
+     border-radius: 8px;
+     cursor: pointer;
+     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+     transition: all 0.3s ease;
+     font-weight: bold;
+    }
 
-  // Add points for outliers in boxplot sections
-  // Plot X-axis outliers
-  svg.selectAll(".outlierX")
-    .data(outliers.filter(d => d.x < xStats.lowerWhisker || d.x > xStats.upperWhisker))
-    .enter()
-    .append("circle")
-    .attr("class", "outlierX")
-    .attr("cx", d => xScale(d.x))
-    .attr("cy", height + 20) // Positioning the outliers below the X-axis boxplot
-    .attr("r", 5)
-    .attr("fill", "orange")
-    .attr("stroke", "black")
-    .append("title")
-    .text(d => `Outlier X: ${d.x.toFixed(2)}`);
+    .next-btn:hover {
+     background: linear-gradient(135deg, #0056b3, #003f7f);
+     transform: translateY(-2px);
+     box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+    }
 
-  // Plot Y-axis outliers
-  svg.selectAll(".outlierY")
-    .data(outliers.filter(d => d.y < yStats.lowerWhisker || d.y > yStats.upperWhisker))
-    .enter()
-    .append("circle")
-    .attr("class", "outlierY")
-    .attr("cx", -20) // Positioning the outliers to the left of the Y-axis boxplot
-    .attr("cy", d => yScale(d.y))
-    .attr("r", 5)
-    .attr("fill", "orange")
-    .attr("stroke", "black")
-    .append("title")
-    .text(d => `Outlier Y: ${d.y.toFixed(2)}`);
+    .next-btn:active {
+     transform: translateY(1px);
+     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+  `;
+  document.head.appendChild(style);
 
-  // Add X-axis without ticks and numbers
-  svg.append("g")
-    .attr("transform", `translate(0, ${height})`)
-    .call(d3.axisBottom(xScale).tickSize(0).tickFormat(() => "")); // No ticks and no numbers on X-axis
+  d3.select("#nextButton").selectAll("*").remove(); // Fix for duplicate buttons
 
-  // Add Y-axis without ticks and numbers
-  svg.append("g")
-    .call(d3.axisLeft(yScale).tickSize(0).tickFormat(() => "")); // No ticks and no numbers on Y-axis
+    const buttonContainer = d3.select("#nextButton")
+      .append("div")
+      .attr("class", "button-container");
 
-  // Draw X-axis boxplot
-  svg.append("rect")
-    .attr("x", xScale(xStats.q1))
-    .attr("y", height + 10)
-    .attr("width", xScale(xStats.q3) - xScale(xStats.q1))
-    .attr("height", 20)
-    .attr("fill", "lightgrey")
-    .attr("stroke", "black");
+    buttonContainer.append("button")
+      .attr("class", "next-btn")
+      .text(currentIndex === scatterplotData.length - 1 ? "Finish!" : "Submit!")
+      .on("click", () => {
+        clearTimeout(timer);
+        goToNextScatterplot();
+      });
 
-  svg.append("line")
-    .attr("x1", xScale(xStats.median))
-    .attr("y1", height + 10)
-    .attr("x2", xScale(xStats.median))
-    .attr("y2", height + 30)
-    .attr("stroke", "black");
+  startTimer();
 
-  svg.append("line")
-    .attr("x1", xScale(xStats.lowerWhisker))
-    .attr("y1", height + 20)
-    .attr("x2", xScale(xStats.q1))
-    .attr("y2", height + 20)
-    .attr("stroke", "black");
 
-  svg.append("line")
-    .attr("x1", xScale(xStats.q3))
-    .attr("y1", height + 20)
-    .attr("x2", xScale(xStats.upperWhisker))
-    .attr("y2", height + 20)
-    .attr("stroke", "black");
+  function goToNextScatterplot() {
+    if (currentIndex < scatterplotData.length - 1) {
+      currentIndex++;
+      renderScatterplot(currentIndex);
+    } else if (currentIndex == scatterplotData.length - 1) {
+      endTest()
+    }
+  }
 
-  // Draw Y-axis boxplot
-  svg.append("rect")
-    .attr("x", -30)
-    .attr("y", yScale(yStats.q3))
-    .attr("width", 20)
-    .attr("height", yScale(yStats.q1) - yScale(yStats.q3))
-    .attr("fill", "lightgrey")
-    .attr("stroke", "black");
+  function startTimer() {
+      countdownTime = 30;
+      updateTimerDisplay(countdownTime);
+      clearInterval(timer);
+      timer = setInterval(() => {
+          countdownTime--;
+          updateTimerDisplay(countdownTime);
+          if (countdownTime <= 0) {
+              clearInterval(timer);
+              let now = new Date();
+              let timestamp = now.toLocaleString() + '.' + now.getMilliseconds().toString().padStart(3, '0');
+              interactionLog.push({ type: "timeout", scatterplot: files[currentIndex], index: currentIndex, countdownTime });
+              goToNextScatterplot();
+          }
+      }, 1000);
+  }
 
-  svg.append("line")
-    .attr("x1", -30)
-    .attr("y1", yScale(yStats.median))
-    .attr("x2", -10)
-    .attr("y2", yScale(yStats.median))
-    .attr("stroke", "black");
-
-  svg.append("line")
-    .attr("x1", -20)
-    .attr("y1", yScale(yStats.lowerWhisker))
-    .attr("x2", -20)
-    .attr("y2", yScale(yStats.q1))
-    .attr("stroke", "black");
-
-  svg.append("line")
-    .attr("x1", -20)
-    .attr("y1", yScale(yStats.q3))
-    .attr("x2", -20)
-    .attr("y2", yScale(yStats.upperWhisker))
-    .attr("stroke", "black");
+  function updateTimerDisplay(time) {
+    const tens = Math.floor(time / 10);
+    const units = time % 10;
+    document.querySelector('#timer .tick:nth-child(1)').setAttribute('data-value', String(tens));
+    document.querySelector('#timer .tick:nth-child(2)').setAttribute('data-value', String(units));
+  }
 }
+
+let navigatingToIntermediate = false;
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    if (navigatingToIntermediate) {
+      return;
+    }
+
+    visibilityCount++;
+
+    if (visibilityCount === 1) {
+      alert("If you switch tabs or minimize the window again, the test will end.");
+    } else if (visibilityCount > 1) {
+      endTest();
+    }
+  }
+}
+
+function navigateToIntermediate() {
+  navigatingToIntermediate = true; // Set flag before navigation
+  window.location.href = "intermediate.html";
+}
+
+function endTest() {
+  testEnded = true;
+  if (currentIndex == scatterplotData.length - 1) {
+    navigateToIntermediate(); // Use safe navigation
+  } else {
+    window.location.href = "end.html"; // Normal navigation for other pages
+  }
+}
+
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
+function handleBeforeUnload(event) {
+  if (visibilityCount > 1) {
+    event.preventDefault();
+    event.returnValue = 'The test will be finished if you leave the page now.';
+  }
+}
+
+startDashboard();

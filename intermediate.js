@@ -1,9 +1,111 @@
 let timer;
+let countdownTime = 30;
+let timerStartTimestamp = null;
+
 let currentIndex = 0;
 let visibilityCount = 0;
 let testEnded = false;
 
+function setCookie(name, value, days = 1) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+}
+
+function getCookie(name) {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=');
+    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+  }, '');
+}
+
+function saveState() {
+  setCookie('visibilityCount', visibilityCount);
+  setCookie('testEnded', testEnded);
+  setCookie('currentIndex', currentIndex);
+  setCookie('countdownTime', countdownTime);
+  setCookie('timerStartTimestamp', timerStartTimestamp);
+}
+
+function isValidNumber(val) {
+  return !isNaN(val) && val !== null && val !== '';
+}
+
+function loadState() {
+  const savedVisibility = getCookie('visibilityCount');
+  if (isValidNumber(savedVisibility)) visibilityCount = Number(savedVisibility);
+  const ended = getCookie('testEnded');
+  if (ended) testEnded = ended === 'true';
+
+  const idx = getCookie('currentIndex');
+  const savedTime = getCookie('countdownTime');
+  const savedTimestamp = getCookie('timerStartTimestamp');
+
+  if (idx) currentIndex = Number(idx);
+  if (savedTime) countdownTime = Number(savedTime);
+  if (savedTimestamp) timerStartTimestamp = Number(savedTimestamp);
+}
+
+function clearTimerCookies() {
+  document.cookie = 'countdownTime=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'timerStartTimestamp=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+function clearCookies() {
+  [
+    'currentIndex',
+    'scatterplotData',
+    'hoveredPoints',
+    'interactionLog',
+    'slope',
+    'tries',
+    'countdownTime',
+    'startTime',
+    'timespent'
+  ].forEach(name => {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  });
+}
+
+window.addEventListener('pageshow', (event) => {
+  // This fires even on back navigation
+  const cameFromMiniVlat = getCookie('cameFromMiniVlat');
+  blockReentryIfAlreadyStarted();
+});
+
+function blockReentryIfAlreadyStarted() {
+  const cameFromMiniVlat = getCookie('cameFromMiniVlat');
+  const testEnded = getCookie('testEnded') === 'true';
+
+  if (cameFromMiniVlat === 'true' && !testEnded) {
+    restoringSession = true; // prevent visibility change during redirect
+    setCookie('cameFromMiniVlat', 'false');
+    window.location.replace("mini-vlat.html");
+  }
+}
+
 function startMiniVLAT() {
+    if (window.alertShown) return;
+    window.alertShown = true;
+
+    setCookie('cameFromIntermediate', 'true');
+
+    loadState();
+
+    const cameFromStudy = getCookie('cameFromStudy') === 'true';
+
+    // Detect navigation type
+    let navType = performance.getEntriesByType("navigation")[0]?.type || "navigate";
+
+    // Show alert only if it's a reload and not from initial.js
+    if (visibilityCount === 1 && navType === "reload" && !cameFromStudy) {
+      alert("If you switch tabs, refresh or minimize the window again, the test will end.");
+    } else if (visibilityCount > 1) {
+      endTest();
+    }
+
+    // Clear the flag after use
+    setCookie('cameFromStudy', 'false');
+
     // Check if the button already exists
     const existingButton = document.querySelector('.next-btn');
     if (existingButton) {
@@ -78,20 +180,23 @@ function startMiniVLAT() {
 }
 
 function startTimer() {
-    countdownTime = 30;
+    if (!countdownTime || countdownTime <= 0 || countdownTime > 30) {
+      countdownTime = 30;
+    }
+
     updateTimerDisplay(countdownTime);
     clearInterval(timer);
 
     timer = setInterval(() => {
-        countdownTime--;
-        updateTimerDisplay(countdownTime);
+      countdownTime--;
+      updateTimerDisplay(countdownTime);
 
-        if (countdownTime <= 0) {
-            clearInterval(timer);
-            navigatingToMinivlat();
-        }
+      if (countdownTime <= 0) {
+        clearInterval(timer);
+        navigateToMinivlat();
+      }
     }, 1000);
-}
+  }
 
 function updateTimerDisplay(time) {
     const tens = Math.floor(time / 10);
@@ -109,6 +214,8 @@ function handleVisibilityChange() {
     }
 
     visibilityCount++;
+    setCookie('visibilityCount', visibilityCount);
+    saveState();
 
     if (visibilityCount === 1) {
       alert("If you switch tabs or minimize the window again, the test will end.");
@@ -120,21 +227,27 @@ function handleVisibilityChange() {
 
 function navigateToMinivlat() {
   navigatingToMinivlat = true;
-  window.location.href = "mini-vlat.html";
+  clearCookies();
+  setCookie('cameFromIntermediate', 'true');
+  window.location.replace("mini-vlat.html");
 }
 
 function endTest() {
+  clearCookies();
   testEnded = true;
-  window.location.href = "end.html";
+
+  setCookie('testEnded', testEnded);
+  window.location.replace("end.html");
 }
 
 document.addEventListener('visibilitychange', handleVisibilityChange);
 
 function handleBeforeUnload(event) {
-  if (visibilityCount > 1) {
-    event.preventDefault();
-    event.returnValue = 'The test will be finished if you leave the page now.';
-  }
+  //if (visibilityCount > 1) {
+    //event.preventDefault();
+    //event.returnValue = 'The test will be finished if you leave the page now.';
+  //}
 }
 
+window.addEventListener('beforeunload', handleBeforeUnload);
 window.addEventListener('load', startMiniVLAT);

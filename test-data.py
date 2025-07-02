@@ -6,21 +6,20 @@ data = {
     'user_id': 123,
     'file_name': 'testfile.csv',
     'slope': 12.34,
-    'timestamp': datetime.now(),
+    'timespent': 5.123,
     'start_position_left': 10.25,
     'end_position_left': 12.75,
     'start_position_right': 11.00,
-    'end_position_right': 13.50,
-    'displacement_left': 2.50,
-    'displacement_right': 2.50
+    'end_position_right': 13.50
 }
 
 # Connect to remote MariaDB
 conn = mysql.connector.connect(
-    host='193.136.128.108',
+    host='db.tecnico.ulisboa.pt',
     user='ist1111187',
     password='zisz0175',
-    database='ist1111187'
+    database='ist1111187',
+    ssl_disabled=True
 )
 
 cursor = conn.cursor()
@@ -28,18 +27,16 @@ cursor = conn.cursor()
 # Insert query
 query = """
 INSERT INTO trials (
-    user_id, file_name, slope, timestamp,
+    user_id, file_name, slope, timespent,
     start_position_left, end_position_left,
-    start_position_right, end_position_right,
-    displacement_left, displacement_right
-) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    start_position_right, end_position_right
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
 """
 
 values = (
-    data['user_id'], data['file_name'], data['slope'], data['timestamp'],
+    data['user_id'], data['file_name'], data['slope'], data['timespent'],
     data['start_position_left'], data['end_position_left'],
-    data['start_position_right'], data['end_position_right'],
-    data['displacement_left'], data['displacement_right']
+    data['start_position_right'], data['end_position_right']
 )
 
 cursor.execute(query, values)

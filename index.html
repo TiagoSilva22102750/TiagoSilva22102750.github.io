@@ -13,9 +13,8 @@
                 font-family: Arial, sans-serif;
             }
             body, html {
-                height: 100%;
                 width: 100%;
-                overflow: hidden;
+                overflow: auto;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -27,8 +26,11 @@
                 padding: 20px 30px;
                 border-radius: 10px;
                 box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-                max-width: 1200px;
+                max-width: 80vw;  /* use viewport width */
+                max-height: 100%; /* limit max height */
+                margin-bottom:20px
             }
+
             .thank-you-card h1 {
                 font-size: 24px;
                 color: #333;
@@ -73,9 +75,8 @@
             }
 
             .iframe-container iframe {
-                width: 100%;
-                max-width: 700px; /* Limits width on larger screens */
-                height: 400px;
+                width: 66vw;
+                height: 66vh;
                 border-radius: 15px;
                 box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
                 border: none;
@@ -84,6 +85,28 @@
 
             .iframe-container iframe:hover {
                 transform: scale(1.02);
+            }
+
+            .toast {
+              position: fixed;
+              bottom: 20px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: #ffcc00;
+              color: #000;
+              padding: 15px 30px;
+              border-radius: 8px;
+              font-weight: bold;
+              box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+              opacity: 0;
+              pointer-events: none;
+              transition: opacity 0.5s ease;
+              z-index: 1000;
+            }
+
+            .toast.show {
+              opacity: 1;
+              pointer-events: auto;
             }
         </style>
         <script src="initial.js"></script>

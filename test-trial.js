@@ -1,5 +1,5 @@
-const margin = { top: 20, right: 20, bottom: 50, left: 60 };
-const size = 870;
+const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+const size = 650;
 const width = size - margin.left - margin.right;
 const height = size - margin.top - margin.bottom;
 
@@ -18,8 +18,138 @@ let tries = 0;
 let countdownTime = 0;
 let startTime = 0.0;
 let timespent = 0.0;
+let ballLeftY = height/2;
+let ballRightY = height/2;
+let smallBallLeftY = height/2;
+let smallBallRightY = height/2;
+
+function setCookie(name, value, days = 1) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+}
+
+function getCookie(name) {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=');
+    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+  }, '');
+}
+
+function saveState() {
+  setCookie('visibilityCount', visibilityCount);
+  setCookie('testEnded', testEnded);
+  setCookie('currentIndex', currentIndex);
+  setCookie('scatterplotData', JSON.stringify(scatterplotData));
+  setCookie('hoveredPoints', JSON.stringify(hoveredPoints));
+  setCookie('interactionLog', JSON.stringify(interactionLog));
+  setCookie('slope', slope);
+  setCookie('tries', tries);
+  setCookie('countdownTime', countdownTime);
+  setCookie('startTime', startTime);
+  setCookie('timespent', timespent);
+  setCookie('ballLeftY', ballLeftY);
+  setCookie('ballRightY', ballRightY);
+  setCookie('smallBallLeftY', smallBallLeftY);
+  setCookie('smallBallRightY', smallBallRightY);
+}
+
+function isValidNumber(val) {
+  return !isNaN(val) && val !== null && val !== '';
+}
+
+function loadState() {
+  const savedVisibility = getCookie('visibilityCount');
+  if (isValidNumber(savedVisibility)) visibilityCount = Number(savedVisibility);
+  const ended = getCookie('testEnded');
+  if (ended) testEnded = ended === 'true';
+
+  const idx = getCookie('currentIndex');
+  const savedTime = getCookie('countdownTime');
+  const savedScatter = getCookie('scatterplotData');
+  const hovered = getCookie('hoveredPoints');
+  const interactions = getCookie('interactionLog');
+
+  if (isValidNumber(idx)) currentIndex = Number(idx);
+  if (isValidNumber(savedTime)) countdownTime = Number(savedTime);
+  if (savedScatter) scatterplotData = JSON.parse(savedScatter);
+  if (hovered) hoveredPoints = JSON.parse(hovered);
+  if (interactions) interactionLog = JSON.parse(interactions);
+
+  const slopeVal = getCookie('slope');
+  const triesVal = getCookie('tries');
+  const start = getCookie('startTime');
+  const spent = getCookie('timespent');
+  const savedBallLeftY = getCookie('ballLeftY');
+  const savedBallRightY = getCookie('ballRightY');
+  const savedSmallBallLeftY = getCookie('smallBallLeftY');
+  const savedSmallBallRightY = getCookie('smallBallRightY');
+
+  if (isValidNumber(slopeVal)) slope = Number(slopeVal);
+  if (isValidNumber(triesVal)) tries = Number(triesVal);
+  if (isValidNumber(start)) startTime = Number(start);
+  if (isValidNumber(spent)) timespent = Number(spent);
+
+  // Safe fallback to default if values are not valid numbers
+  ballLeftY = isValidNumber(savedBallLeftY) ? Number(savedBallLeftY) : height / 2;
+  ballRightY = isValidNumber(savedBallRightY) ? Number(savedBallRightY) : height / 2;
+  smallBallLeftY = isValidNumber(savedSmallBallLeftY) ? Number(savedSmallBallLeftY) : height / 2;
+  smallBallRightY = isValidNumber(savedSmallBallRightY) ? Number(savedSmallBallRightY) : height / 2;
+}
+
+function clearCookies() {
+  [
+    'currentIndex',
+    'scatterplotData',
+    'hoveredPoints',
+    'interactionLog',
+    'slope',
+    'tries',
+    'countdownTime',
+    'startTime',
+    'timespent'
+  ].forEach(name => {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  });
+}
+
+window.addEventListener('pageshow', (event) => {
+  // This fires even on back navigation
+  const cameFromStudy = getCookie('cameFromStudy');
+  blockReentryIfAlreadyStarted();
+});
+
+function blockReentryIfAlreadyStarted() {
+  const cameFromStudy = getCookie('cameFromStudy');
+  const testEnded = getCookie('testEnded') === 'true';
+
+  if (cameFromStudy === 'true' && !testEnded) {
+    restoringSession = true; // prevent visibility change during redirect
+    setCookie('cameFromStudy', 'false');
+    window.location.replace("study.html");
+  }
+}
 
 function startDashboard() {
+  if (window.alertShown) return;
+  window.alertShown = true;
+
+  loadState();
+
+  const cameFromInitial = getCookie('cameFromInitial') === 'true';
+
+  // Detect navigation type
+  let navType = performance.getEntriesByType("navigation")[0]?.type || "navigate";
+
+  // Show alert only if it's a reload and not from initial.js
+  if (visibilityCount === 1 && navType === "reload" && !cameFromInitial) {
+    alert("If you switch tabs, refresh or minimize the window again, the test will end.");
+  } else if (visibilityCount > 1) {
+    endTest();
+  }
+
+  // Clear the flag after use
+  setCookie('cameFromInitial', 'false');
+
   function loadCSV(file) {
     return d3.csv(file);
   }
@@ -88,6 +218,14 @@ function updateHoverDisplay() {
 
 function renderScatterplot(index) {
   startTime = performance.now();
+
+  if (!isValidNumber(getCookie('ballLeftY'))) {
+    clearCookies();
+  }
+
+  const defaultY = height / 2;
+  const leftY = ballLeftY !== null ? ballLeftY : defaultY;
+  const rightY = ballRightY !== null ? ballRightY : defaultY;
 
   if (testEnded) {
     alert("The test has ended because you switched tabs or minimized the window too many times.");
@@ -166,33 +304,33 @@ function renderScatterplot(index) {
 
   const regressionLine = svg.append("line")
     .attr("x1", 0)
-    .attr("y1", height / 2)
+    .attr("y1", leftY)
     .attr("x2", width)
-    .attr("y2", height / 2)
+    .attr("y2", rightY)
     .attr("stroke", "red")
     .attr("stroke-width", 3);
 
   const ballLeft = svg.append("circle")
     .attr("cx", 0)
-    .attr("cy", height / 2)
+    .attr("cy", leftY)
     .attr("r", 8)
     .attr("fill", "red");
 
   const smallBallLeft = svg.append("circle")
     .attr("cx", 0)
-    .attr("cy", height / 2)
+    .attr("cy", leftY)
     .attr("r", 4)  // Smaller radius
     .attr("fill", "white");
 
   const ballRight = svg.append("circle")
     .attr("cx", width)
-    .attr("cy", height / 2)
+    .attr("cy", rightY)
     .attr("r", 8)
     .attr("fill", "red");
 
   const smallBallRight = svg.append("circle")
     .attr("cx", width)
-    .attr("cy", height / 2)
+    .attr("cy", rightY)
     .attr("r", 4)
     .attr("fill", "white");
 
@@ -203,14 +341,6 @@ function renderScatterplot(index) {
     slope = slope.toFixed(2);
 
     d3.select("#slopeDisplay").text(`Slope: ${slope}`);
-
-    if (slope > 0.00) {
-      d3.select("#slopeDisplay").style("color", "green");
-    } else if (slope < 0.00) {
-      d3.select("#slopeDisplay").style("color", "red");
-    } else {
-      d3.select("#slopeDisplay").style("color", "black");
-    }
   }
 
   updateSlopeDisplay();
@@ -236,7 +366,9 @@ function renderScatterplot(index) {
     .on("drag", function (event) {
       let newY = Math.max(0, Math.min(height, event.y));
       ballLeft.attr("cy", newY);
+      ballLeftY = newY;
       smallBallLeft.attr("cy", newY);
+      smallBallLeftY = newY;
       regressionLine.attr("y1", newY);
       updateSlopeDisplay();
     })
@@ -257,7 +389,9 @@ function renderScatterplot(index) {
     .on("drag", function (event) {
       let newY = Math.max(0, Math.min(height, event.y));
       ballRight.attr("cy", newY);
+      ballRightY = newY;
       smallBallRight.attr("cy", newY);
+      smallBallRightY = newY;
       regressionLine.attr("y2", newY);
       updateSlopeDisplay();
     })
@@ -283,6 +417,7 @@ function renderScatterplot(index) {
 
     interactionLog.push({
       type: "final",
+      scatterplot: files[currentIndex],
       left: { start: dragData.left.start, end: dragData.left.end, displacement: dragData.left.displacement },
       right: { start: dragData.right.start, end: dragData.right.end, displacement: dragData.right.displacement },
       hoveredPoints: [...hoveredPoints]
@@ -334,28 +469,75 @@ function renderScatterplot(index) {
       .attr("class", "next-btn")
       .text(currentIndex === scatterplotData.length - 1 ? "Continue" : "Submit")
       .on("click", () => {
-        alertIfTestValueIncorrect(index);
+        timespent = ((performance.now() - startTime) / 1000).toFixed(3);
+
+        if (slope != -0.50 && slope != 0.75 && tries <= 1) {
+            alertIfTestValueIncorrect(currentIndex);
+        }
+
+        const trialData = {
+          user_id: 123, // pode vir de uma variável global ou input
+          file_name: files[currentIndex], // substitui se necessário
+          slope: slope,
+          timespent: timespent, // calcula esta duração como quiseres
+          start_position_left: dragData.left.start,
+          end_position_left: dragData.left.end,
+          start_position_right: dragData.right.start,
+          end_position_right: dragData.right.end
+        };
+
+        const eventData = {
+          user_id: 123, // pode vir de uma variável global ou input
+          file_name: files[currentIndex], // substitui se necessário
+          start_position_left: dragData.left.start,
+          end_position_left: dragData.left.end,
+          start_position_right: dragData.right.start,
+          end_position_right: dragData.right.end,
+          interaction_log: interactionLog
+        };
+
         if (index == 0 && slope == -0.50 && tries <= 1 ) {
-            storeFinalPositions();
-            clearTimeout(timer);
-            updateInstructions(currentIndex);
-            tries = 0;
-            d3.select("#customAlert").style("display", "none");
-            goToNextScatterplot();
+            Promise.all([
+              sendTrialData(trialData),
+              sendEventData(eventData)
+            ]).then(() => {
+              storeFinalPositions();
+              clearTimeout(timer);
+              updateInstructions(currentIndex);
+              tries = 0;
+              d3.select("#customAlert").style("display", "none");
+              goToNextScatterplot();
+            }).catch((error) => {
+              console.error("Erro ao enviar dados:", error);
+            });
         } else if (index == 1 && slope == 0.75 && tries <= 1) {
-            storeFinalPositions();
-            clearTimeout(timer);
-            updateInstructions(currentIndex);
-            tries = 0;
-            d3.select("#customAlert").style("display", "none");
-            goToNextScatterplot();
+            Promise.all([
+              sendTrialData(trialData),
+              sendEventData(eventData)
+            ]).then(() => {
+              storeFinalPositions();
+              clearTimeout(timer);
+              updateInstructions(currentIndex);
+              tries = 0;
+              d3.select("#customAlert").style("display", "none");
+              goToNextScatterplot();
+            }).catch((error) => {
+              console.error("Erro ao enviar dados:", error);
+            });
         } else if (tries > 1) {
-            storeFinalPositions();
-            clearTimeout(timer);
-            updateInstructions(currentIndex);
-            tries = 0;
-            d3.select("#customAlert").style("display", "none");
-            goToNextScatterplot();
+            Promise.all([
+              sendTrialData(trialData),
+              sendEventData(eventData)
+            ]).then(() => {
+              storeFinalPositions();
+              clearTimeout(timer);
+              updateInstructions(currentIndex);
+              tries = 0;
+              d3.select("#customAlert").style("display", "none");
+              goToNextScatterplot();
+            }).catch((error) => {
+              console.error("Error sending the data:", error);
+            });
         }
       });
 
@@ -365,28 +547,69 @@ function renderScatterplot(index) {
   function goToNextScatterplot() {
     if (currentIndex < scatterplotData.length - 1) {
       currentIndex++;
+      countdownTime = 30; // Reset ONLY when moving to a new scatterplot
+
+      ballLeftY = height/2;
+      ballRightY = height/2;
+      smallBallLeftY = height/2;
+      smallBallRightY = height/2;
+
       updateInstructions(currentIndex);
       renderScatterplot(currentIndex);
-    } else if (currentIndex == scatterplotData.length - 1) {
-      endTest()
+    } else if (currentIndex === scatterplotData.length - 1) {
+      endTest();
     }
   }
 
   function startTimer() {
+    if (!countdownTime || countdownTime <= 0 || countdownTime > 30) {
       countdownTime = 30;
+    }
+
+    updateTimerDisplay(countdownTime);
+    clearInterval(timer);
+
+    timer = setInterval(() => {
+      countdownTime--;
       updateTimerDisplay(countdownTime);
-      clearInterval(timer);
-      timer = setInterval(() => {
-          countdownTime--;
-          updateTimerDisplay(countdownTime);
-          if (countdownTime <= 0) {
-              clearInterval(timer);
-              let timestamp = new Date().toLocaleString();
-              interactionLog.push({ type: "timeout", scatterplot: files[currentIndex], index: currentIndex, countdownTime });
-              storeFinalPositions();
-              goToNextScatterplot();
-          }
-      }, 1000);
+
+      if (countdownTime <= 0) {
+        const trialData = {
+          user_id: 123, // pode vir de uma variável global ou input
+          file_name: files[currentIndex], // substitui se necessário
+          slope: slope,
+          timespent: timespent, // calcula esta duração como quiseres
+          start_position_left: dragData.left.start,
+          end_position_left: dragData.left.end,
+          start_position_right: dragData.right.start,
+          end_position_right: dragData.right.end
+        };
+
+        const eventData = {
+          user_id: 123, // pode vir de uma variável global ou input
+          file_name: files[currentIndex], // substitui se necessário
+          start_position_left: dragData.left.start,
+          end_position_left: dragData.left.end,
+          start_position_right: dragData.right.start,
+          end_position_right: dragData.right.end,
+          interaction_log: interactionLog
+        };
+
+        clearInterval(timer);
+        let timestamp = new Date().toLocaleString();
+        interactionLog.push({ type: "timeout", scatterplot: files[currentIndex], index: currentIndex, countdownTime });
+
+        Promise.all([
+          sendTrialData(trialData),
+          sendEventData(eventData)
+        ]).then(() => {
+          storeFinalPositions();
+          goToNextScatterplot();
+        }).catch((error) => {
+          console.error("Error sending the data:", error);
+        });
+      }
+    }, 1000);
   }
 
   function updateTimerDisplay(time) {
@@ -406,6 +629,8 @@ function handleVisibilityChange() {
     }
 
     visibilityCount++;
+    setCookie('visibilityCount', visibilityCount);
+    saveState();
 
     if (visibilityCount === 1) {
       alert("If you switch tabs or minimize the window again, the test will end.");
@@ -417,26 +642,66 @@ function handleVisibilityChange() {
 
 function navigateToStudy() {
   navigatingToStudy = true; // Set flag before navigation
+  clearCookies();
   d3.select("#customAlert").style("display", "none");
-  window.location.href = "study.html";
+  setCookie('cameFromTestTrial', 'true');
+  window.location.replace("study.html");
 }
 
 function endTest() {
+  clearCookies();
   testEnded = true;
+
   if (currentIndex == scatterplotData.length - 1) {
     navigateToStudy(); // Use safe navigation
   } else {
-    window.location.href = "end.html"; // Normal navigation for other pages
+    setCookie('testEnded', testEnded);
+    window.location.replace("end.html"); // Normal navigation for other pages
   }
 }
 
 document.addEventListener('visibilitychange', handleVisibilityChange);
 
 function handleBeforeUnload(event) {
-  if (visibilityCount > 1) {
-    event.preventDefault();
-    event.returnValue = 'The test will be finished if you leave the page now.';
-  }
+  //if (visibilityCount > 1) {
+    //event.preventDefault();
+    //event.returnValue = 'The test will be finished if you leave the page now.';
+  //}
 }
 
-startDashboard();
+function sendTrialData(data) {
+  return fetch("http://193.136.128.108:5000/submit-trial", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(result => {
+    console.log("Resposta do servidor:", result);
+  })
+  .catch(error => {
+    console.error("Erro ao enviar os dados:", error);
+  });
+}
+
+function sendEventData(data) {
+  return fetch("http://193.136.128.108:5000/submit-event", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(result => {
+    console.log("Resposta do servidor:", result);
+  })
+  .catch(error => {
+    console.error("Erro ao enviar os dados:", error);
+  });
+}
+
+window.addEventListener('beforeunload', handleBeforeUnload);
+window.addEventListener('load', startDashboard);
