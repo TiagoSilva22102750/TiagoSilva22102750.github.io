@@ -741,7 +741,6 @@ function sendEventData(data) {
   })
   .catch(error => {
     console.error("Erro ao enviar os dados:", error);
-    alert(error);
   });
 }
 
