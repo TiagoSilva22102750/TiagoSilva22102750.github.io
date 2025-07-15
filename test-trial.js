@@ -670,7 +670,7 @@ function handleBeforeUnload(event) {
 }
 
 function sendTrialData(data) {
-  return fetch("https://193.136.128.108:5000/submit-trial", {
+  return fetch("https://193.136.128.109:5000/submit-trial", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -687,7 +687,7 @@ function sendTrialData(data) {
 }
 
 function sendEventData(data) {
-  return fetch("https://193.136.128.108:5000/submit-event", {
+  return fetch("https://193.136.128.109:5000/submit-event", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
