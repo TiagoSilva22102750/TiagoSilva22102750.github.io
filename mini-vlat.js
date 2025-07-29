@@ -359,7 +359,7 @@ function handleBeforeUnload(event) {
 }
 
 function sendMiniVlatAnswerData(data) {
-  return fetch("https://193.136.128.108:5000/submit-minivlat-answer", {
+  return fetch("http://193.136.128.108:5000/submit-minivlat-answer", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
