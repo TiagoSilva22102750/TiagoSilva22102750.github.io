@@ -11,6 +11,7 @@ let navigatingToTestTrial = false;
 
 let restoringSession = false;
 let visibilityChangeHandled = false;
+let videoWatched = false;
 
 function setCookie(name, value, days = 1) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -86,7 +87,35 @@ function startStudy() {
         return; // Exit if the button already exists
     }
 
-    // Add button styles
+    const videoElement = document.getElementById('video');
+    if (videoElement) {
+        videoElement.addEventListener('ended', () => {
+            videoWatched = true;
+            enableStartButton();
+        });
+
+        // Optional: If you want to allow button when 90% of the video is watched
+        videoElement.addEventListener('timeupdate', () => {
+            if (!videoWatched && videoElement.currentTime >= videoElement.duration * 0.9) {
+                videoWatched = true;
+                enableStartButton();
+            }
+        });
+    }
+
+    let timerDisplay = document.createElement("div");
+    timerDisplay.id = "timer";
+    timerDisplay.classList.add("timer");
+    document.body.appendChild(timerDisplay);
+
+    createStartButton();
+    startTimer();
+}
+
+function createStartButton() {
+    // Prevent duplicate button
+    if (document.querySelector('.next-btn')) return;
+
     const style = document.createElement("style");
     style.innerHTML = `
         .button-container {
@@ -102,21 +131,22 @@ function startStudy() {
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
+            cursor: not-allowed;
+            opacity: 0.5;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             font-weight: bold;
         }
 
-        .next-btn:hover {
+        .next-btn.enabled {
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        .next-btn.enabled:hover {
             background: linear-gradient(135deg, #0056b3, #003f7f);
             transform: translateY(-2px);
             box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .next-btn:active {
-            transform: translateY(1px);
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         .timer {
@@ -128,69 +158,32 @@ function startStudy() {
     `;
     document.head.appendChild(style);
 
-    let container = document.createElement("div");
+    const container = document.createElement("div");
     container.classList.add("button-container");
 
-    let button = document.createElement("button");
+    const button = document.createElement("button");
     button.textContent = "Start Test Trial";
     button.classList.add("next-btn");
-    button.onclick = navigateToTestTrial;
+    button.disabled = true; // Initially disabled
     container.appendChild(button);
 
-    // Append button inside the thank-you card
-    let thankYouCard = document.querySelector('.thank-you-card');
-    if (thankYouCard) {
-        thankYouCard.appendChild(container);
-    } else {
-        console.error("Thank You Card element not found!");
-    }
+    button.addEventListener('click', () => {
+        if (videoWatched) navigateToTestTrial();
+        else alert("Please watch the video before starting the test.");
+    });
 
-    let timerDisplay = document.createElement("div");
-    timerDisplay.id = "timer";
-    timerDisplay.classList.add("timer");
-    document.body.appendChild(timerDisplay);
-
-    startTimer();
+    const thankYouCard = document.querySelector('.thank-you-card');
+    if (thankYouCard) thankYouCard.appendChild(container);
+    else console.error("Thank You Card element not found!");
 }
 
-/*
-function startTimer() {
-  if (countdownTime <= 0) {
-    navigateToTestTrial();
-    return;
-  }
-
-  // If we have a saved timestamp, calculate elapsed time
-  if (timerStartTimestamp) {
-    const elapsed = Math.floor((Date.now() - timerStartTimestamp) / 1000);
-    countdownTime = countdownTime - elapsed;
-    if (countdownTime <= 0) {
-      countdownTime = 0;
-      navigateToTestTrial();
-      return;
+function enableStartButton() {
+    const button = document.querySelector('.next-btn');
+    if (button) {
+        button.disabled = false;
+        button.classList.add('enabled');
     }
-  }
-
-  updateTimerDisplay(countdownTime);
-  clearInterval(timer);
-  timerStartTimestamp = Date.now();
-  setCookie('timerStartTimestamp', timerStartTimestamp);
-
-  timer = setInterval(() => {
-    countdownTime--;
-    updateTimerDisplay(countdownTime);
-
-    // Save current timer state every tick
-    setCookie('countdownTime', countdownTime);
-    setCookie('timerStartTimestamp', Date.now());
-
-    if (countdownTime <= 0) {
-      clearInterval(timer);
-      navigateToTestTrial();
-    }
-  }, 1000);
 }
-*/
 
 function startTimer() {
     if (!countdownTime || countdownTime <= 0 || countdownTime > 90) {

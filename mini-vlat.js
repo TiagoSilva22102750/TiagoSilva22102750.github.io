@@ -150,7 +150,7 @@ function renderImage(index) {
     img.style.borderRadius = "10px";
 
     img.onerror = function () {
-        alert("Error loading image: " + imageFiles[index]);
+        //alert("Error loading image: " + imageFiles[index]);
         console.error("Error loading image:", imageFiles[index]);
     };
 

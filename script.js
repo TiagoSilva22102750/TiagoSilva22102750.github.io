@@ -232,7 +232,7 @@ function updateInstructions(index) {
   } else {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the slope of the red line to reflect the trend you perceive on the scatterplot.</p>
+      <p>Adjust the slope of the red line.</p>
     `;
   }
 }

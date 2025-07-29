@@ -68,22 +68,22 @@
                 padding-left: 30px;
             }
 
-            .iframe-container {
+            .video-container {
                 display: flex;
                 justify-content: center;
                 margin-top: 20px;
             }
 
-            .iframe-container iframe {
-                width: 66vw;
-                height: 66vh;
+            .video-container video {
+                width: 80vw;
+                height: 80vh;
                 border-radius: 15px;
                 box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
                 border: none;
                 transition: transform 0.3s ease-in-out;
             }
 
-            .iframe-container iframe:hover {
+            .video-container video:hover {
                 transform: scale(1.02);
             }
 
@@ -142,14 +142,11 @@
                 <br>
                 <p>Thank you for your participation, and please proceed when you are ready or wait for the timer to run out!</p>
                 <br>
-                <div class="iframe-container">
-                    <iframe src="https://www.youtube.com/embed/xk6Mv3LvRGo?si=k-EWbj88D0L5wuu2"
-                            title="Task Tutorial"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerpolicy="strict-origin-when-cross-origin"
-                            allowfullscreen>
-                    </iframe>
+                <b><i>Please, watch the video below to learn how to complete the task ahead.</i></b>
+                <div class="video-container">
+                    <video id="video" controls>
+                        <source src="/TaskTutorial_v2.mp4" type="video/mp4">
+                    </video>
                 </div>
             </div>
         </div>
