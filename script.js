@@ -224,17 +224,17 @@ function updateInstructions(index) {
   if (type === "attentiontop") {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the slope of the red line, so that the value is <b>-1.00</b>.</p>
+      <p>Adjust the red line, so that the value is <b>-1.00</b>.</p>
     `;
   } else if (type === "attentionbottom") {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the slope of the red line, so that the value is <b>1.00</b>.</p>
+      <p>Adjust the red line, so that the value is <b>1.00</b>.</p>
     `;
   } else {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the slope of the red line.</p>
+      <p>Adjust the red line to reflect the trend you see in the scatterplot.</p>
     `;
   }
 }

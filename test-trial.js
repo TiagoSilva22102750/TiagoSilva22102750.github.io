@@ -176,12 +176,12 @@ function updateInstructions(index) {
   if (index === 0) {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the slope of the red line to have a value of <b>-0.50</b>.</p>
+      <p>Adjust the red line to have a value of <b>-0.50</b>.</p>
     `;
   } else if (index === 1) {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the slope of the red line to have a value of <b>0.75</b>.</p>
+      <p>Adjust the red line to have a value of <b>0.75</b>.</p>
     `;
   }
 }
