@@ -142,18 +142,23 @@ function createStartButton() {
     container.appendChild(button);
 
     button.addEventListener('click', () => {
-        const userData = {
-            user_id: userIdInput.value
-        };
+      const userID = userIdInput.value.trim();
 
-        Promise.all([
-           sendUserData(userData)
-        ]).then(() => {
-           localStorage.setItem('prolificUserID', userIdInput.value);
-           navigateToInitial();
-        }).catch((error) => {
-            console.error("Erro ao enviar dados:", error);
-        });
+      checkIfUserIdExists(userID)
+       .then(exists => {
+         if (exists) {
+           showToast("This Prolific ID is already registered.");
+         } else {
+           Promise.all([
+             sendUserData({ user_id: userID })
+           ]).then(() => {
+             localStorage.setItem('prolificUserID', userIdInput.value);
+             navigateToInitial();
+           }).catch((error) => {
+             console.error("Erro ao enviar dados:", error);
+           });
+         }
+       });
     });
 
     document.querySelector('.thank-you-card').appendChild(container);
@@ -236,6 +241,20 @@ function sendUserData(data) {
   })
   .catch(error => {
     console.error("Erro ao enviar os dados:", error);
+  });
+}
+
+function checkIfUserIdExists(userId) {
+  return fetch("http://193.136.128.108:5000/check-user-id", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId })
+  })
+  .then(res => res.json())
+  .then(data => data.exists)
+  .catch(err => {
+    alert("Error checking user ID:", err);
+    return false;
   });
 }
 
