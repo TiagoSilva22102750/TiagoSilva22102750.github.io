@@ -59,7 +59,7 @@ function blockReentryIfAlreadyStarted() {
   if (cameFromProlificID && !testEnded) {
     restoringSession = true; // prevent visibility change during redirect
     setCookie('cameFromProlificID', 'false');
-    window.location.replace("index.html");
+    window.location.replace("initial.html");
   }
 }
 
@@ -184,7 +184,7 @@ function navigateToInitial() {
   setCookie('visibilityCount', visibilityCount);
   setCookie('testEnded', testEnded);
   setCookie('cameFromProlificID', 'true');
-  window.location.replace("index.html");
+  window.location.replace("initial.html");
 }
 
 function endTest() {
