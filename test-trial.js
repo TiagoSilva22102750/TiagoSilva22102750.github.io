@@ -22,6 +22,7 @@ let ballLeftY = height/2;
 let ballRightY = height/2;
 let smallBallLeftY = height/2;
 let smallBallRightY = height/2;
+let userID = '';
 
 function setCookie(name, value, days = 1) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -136,6 +137,7 @@ function startDashboard() {
   loadState();
 
   const cameFromInitial = getCookie('cameFromInitial') === 'true';
+  userID = localStorage.getItem('prolificUserID');
 
   // Detect navigation type
   let navType = performance.getEntriesByType("navigation")[0]?.type || "navigate";
@@ -476,7 +478,7 @@ function renderScatterplot(index) {
         }
 
         const trialData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: files[currentIndex], // substitui se necessário
           slope: slope,
           timespent: timespent, // calcula esta duração como quiseres
@@ -487,7 +489,7 @@ function renderScatterplot(index) {
         };
 
         const eventData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: files[currentIndex], // substitui se necessário
           start_position_left: dragData.left.start,
           end_position_left: dragData.left.end,
@@ -575,7 +577,7 @@ function renderScatterplot(index) {
 
       if (countdownTime <= 0) {
         const trialData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: files[currentIndex], // substitui se necessário
           slope: slope,
           timespent: timespent, // calcula esta duração como quiseres
@@ -586,7 +588,7 @@ function renderScatterplot(index) {
         };
 
         const eventData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: files[currentIndex], // substitui se necessário
           start_position_left: dragData.left.start,
           end_position_left: dragData.left.end,

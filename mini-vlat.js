@@ -39,6 +39,7 @@ let countdownTime = 0;
 let testEnded = false;
 let selectedAnswers = [];
 let questionNumber = 0;
+let userID = '';
 
 function setCookie(name, value, days = 1) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -108,6 +109,7 @@ function startImageTest() {
     loadState();
 
     const cameFromIntermediate = getCookie('cameFromIntermediate') === 'true';
+    userID = localStorage.getItem('prolificUserID');
 
     // Detect navigation type
     let navType = performance.getEntriesByType("navigation")[0]?.type || "navigate";
@@ -212,7 +214,7 @@ function renderImage(index) {
         }
 
         const answerData = {
-          user_id: 123,
+          user_id: userID,
           question_number: questionNumber,
           selected_answer: selectedAnswers[index]
         };
@@ -269,7 +271,7 @@ function startTimer() {
         saveState();
 
         const answerData = {
-          user_id: 123,
+          user_id: userID,
           question_number: questionNumber,
           selected_answer: recordedAnswer
         };

@@ -38,6 +38,7 @@ let ballLeftY = null;
 let ballRightY = null;
 let smallBallLeftY = null;
 let smallBallRightY = null;
+let userID = '';
 
 function setCookie(name, value, days = 1) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -149,6 +150,7 @@ function startDashboard() {
   setCookie('cameFromStudy', 'true');
 
   const cameFromTestTrial = getCookie('cameFromTestTrial') === 'true';
+  userID = localStorage.getItem('prolificUserID');
 
   // Detect navigation type
   let navType = performance.getEntriesByType("navigation")[0]?.type || "navigate";
@@ -550,7 +552,7 @@ function renderScatterplot(index) {
         timespent = ((performance.now() - startTime) / 1000).toFixed(3);
 
         const trialData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: getCurrentScatterplotFile(currentIndex), // substitui se necessário
           slope: slope,
           timespent: timespent, // calcula esta duração como quiseres
@@ -561,7 +563,7 @@ function renderScatterplot(index) {
         };
 
         const eventData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: getCurrentScatterplotFile(currentIndex), // substitui se necessário
           start_position_left: dragData.left.start,
           end_position_left: dragData.left.end,
@@ -617,7 +619,7 @@ function renderScatterplot(index) {
 
       if (countdownTime <= 0) {
         const trialData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: getCurrentScatterplotFile(currentIndex), // substitui se necessário
           slope: slope,
           timespent: timespent, // calcula esta duração como quiseres
@@ -628,7 +630,7 @@ function renderScatterplot(index) {
         };
 
         const eventData = {
-          user_id: 123, // pode vir de uma variável global ou input
+          user_id: userID, // pode vir de uma variável global ou input
           file_name: getCurrentScatterplotFile(currentIndex), // substitui se necessário
           start_position_left: dragData.left.start,
           end_position_left: dragData.left.end,

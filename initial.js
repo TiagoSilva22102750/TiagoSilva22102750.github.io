@@ -12,6 +12,7 @@ let navigatingToTestTrial = false;
 let restoringSession = false;
 let visibilityChangeHandled = false;
 let videoWatched = false;
+let userID = '';
 
 function setCookie(name, value, days = 1) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -74,6 +75,8 @@ function startStudy() {
 
     loadState();
     startTime = performance.now();
+
+    userID = localStorage.getItem('prolificUserID');
 
     if (visibilityCount === 1) {
       alert("If you switch tabs, refresh or minimize the window again, the test will end.");
