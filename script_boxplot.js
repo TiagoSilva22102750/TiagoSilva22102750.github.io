@@ -3,7 +3,7 @@ const size = 650;
 const width = size - margin.left - margin.right;
 const height = size - margin.top - margin.bottom;
 
-const files = ["top-narrow-equidistant/data_0,0000_normal_narrow_equidistant_top.csv"];
+const files = ["bottom-narrow-equidistant/data_0,0000_normal_narrow_equidistant_bottom.csv"];
 
 const attentionCheckFiles = ["attention-checks/data_0,7500_xtreme_narrow_uniform_top.csv",
 "attention-checks/data_-0,7500_xtreme_narrow_uniform_bellow.csv"]
