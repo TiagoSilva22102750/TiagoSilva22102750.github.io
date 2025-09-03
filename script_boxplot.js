@@ -3,20 +3,7 @@ const size = 650;
 const width = size - margin.left - margin.right;
 const height = size - margin.top - margin.bottom;
 
-const files = ["top/data_0,0000_normal_narrow_equidistant_top.csv", "top/data_0,0000_xtreme_narrow_equidistant_top.csv",
-"top/data_0,2500_normal_narrow_equidistant_top.csv", "top/data_0,2500_xtreme_narrow_equidistant_top.csv",
-"top/data_0,5000_normal_narrow_equidistant_top.csv", "top/data_0,5000_xtreme_narrow_equidistant_top.csv",
-"top/data_0,7500_normal_narrow_equidistant_top.csv", "top/data_0,7500_xtreme_narrow_equidistant_top.csv",
-"top/data_-0,2500_normal_narrow_equidistant_top.csv", "top/data_-0,2500_xtreme_narrow_equidistant_top.csv",
-"top/data_-0,5000_normal_narrow_equidistant_top.csv", "top/data_-0,5000_xtreme_narrow_equidistant_top.csv",
-"top/data_-0,7500_normal_narrow_equidistant_top.csv", "top/data_-0,7500_xtreme_narrow_equidistant_top.csv",
-"bottom/data_0,0000_normal_narrow_equidistant_bottom.csv", "bottom/data_0,0000_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_0,2500_normal_narrow_equidistant_bottom.csv", "bottom/data_0,2500_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_0,5000_normal_narrow_equidistant_bottom.csv", "bottom/data_0,5000_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_0,7500_normal_narrow_equidistant_bottom.csv", "bottom/data_0,7500_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_-0,2500_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,2500_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_-0,5000_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,5000_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_-0,7500_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,7500_xtreme_narrow_equidistant_bottom.csv"];
+const files = ["top-narrow-equidistant/data_0,0000_normal_narrow_equidistant_top.csv"];
 
 const attentionCheckFiles = ["attention-checks/data_0,7500_xtreme_narrow_uniform_top.csv",
 "attention-checks/data_-0,7500_xtreme_narrow_uniform_bellow.csv"]
@@ -187,6 +174,8 @@ function renderScatterplot(index) {
     const iqr = q3 - q1;
     const lowerFence = q1 - 1.5 * iqr;
     const upperFence = q3 + 1.5 * iqr;
+    const XtremeUpperFence = q3 + 3 * iqr;
+    const XtremeLowerFence = q1 - 3 * iqr;
 
     const outliers = values.filter(v => v < lowerFence || v > upperFence);
     const nonOutliers = values.filter(v => v >= lowerFence && v <= upperFence);
@@ -194,7 +183,7 @@ function renderScatterplot(index) {
     const min = d3.min(nonOutliers);
     const max = d3.max(nonOutliers);
 
-    return { q1, median, q3, iqr, lowerFence, upperFence, min, max, outliers };
+    return { q1, median, q3, iqr, lowerFence, XtremeLowerFence, upperFence, XtremeUpperFence, min, max, outliers };
   }
 
   // --- Boxplot for X values under the x axis ---
@@ -349,6 +338,15 @@ function renderScatterplot(index) {
     .attr("fill", "red")
     .attr("stroke", "black")
 
+  console.log("Xupperfence: " + xStats.upperFence);
+  console.log("Yupperfence: " + yStats.upperFence);
+  console.log("Ylowerfence: " + yStats.lowerFence);
+  console.log("Xextremeupperfence: " + xStats.XtremeUpperFence);
+  console.log("Yextremeupperfence: " + yStats.XtremeUpperFence);
+  console.log("Yextremelowerfence: " + yStats.XtremeLowerFence);
+  console.log("Number of X outliers: " + xStats.outliers.length);
+  console.log("Number of Y outliers: " + yStats.outliers.length);
+
   const style = document.createElement("style");
   style.innerHTML = `
     .button-container {
@@ -409,7 +407,7 @@ function renderScatterplot(index) {
   }
 
   function startTimer() {
-      countdownTime = 30;
+      countdownTime = 300;
       updateTimerDisplay(countdownTime);
       clearInterval(timer);
       timer = setInterval(() => {

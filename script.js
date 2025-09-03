@@ -3,20 +3,20 @@ const size = 650;
 const width = size - margin.left - margin.right;
 const height = size - margin.top - margin.bottom;
 
-const files = ["top/data_0,0000_normal_narrow_equidistant_top.csv", "top/data_0,0000_xtreme_narrow_equidistant_top.csv",
-"top/data_0,2500_normal_narrow_equidistant_top.csv", "top/data_0,2500_xtreme_narrow_equidistant_top.csv",
-"top/data_0,5000_normal_narrow_equidistant_top.csv", "top/data_0,5000_xtreme_narrow_equidistant_top.csv",
-"top/data_0,7500_normal_narrow_equidistant_top.csv", "top/data_0,7500_xtreme_narrow_equidistant_top.csv",
-"top/data_-0,2500_normal_narrow_equidistant_top.csv", "top/data_-0,2500_xtreme_narrow_equidistant_top.csv",
-"top/data_-0,5000_normal_narrow_equidistant_top.csv", "top/data_-0,5000_xtreme_narrow_equidistant_top.csv",
-"top/data_-0,7500_normal_narrow_equidistant_top.csv", "top/data_-0,7500_xtreme_narrow_equidistant_top.csv",
-"bottom/data_0,0000_normal_narrow_equidistant_bottom.csv", "bottom/data_0,0000_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_0,2500_normal_narrow_equidistant_bottom.csv", "bottom/data_0,2500_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_0,5000_normal_narrow_equidistant_bottom.csv", "bottom/data_0,5000_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_0,7500_normal_narrow_equidistant_bottom.csv", "bottom/data_0,7500_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_-0,2500_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,2500_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_-0,5000_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,5000_xtreme_narrow_equidistant_bottom.csv",
-"bottom/data_-0,7500_normal_narrow_equidistant_bottom.csv", "bottom/data_-0,7500_xtreme_narrow_equidistant_bottom.csv"];
+const files = ["top-narrow-equidistant/data_0,0000_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,0000_xtreme_narrow_equidistant_top.csv",
+"top-narrow-equidistant/data_0,2500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,2500_xtreme_narrow_equidistant_top.csv",
+"top-narrow-equidistant/data_0,5000_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,5000_xtreme_narrow_equidistant_top.csv",
+"top-narrow-equidistant/data_0,7500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,7500_xtreme_narrow_equidistant_top.csv",
+"top-narrow-equidistant/data_-0,2500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_-0,2500_xtreme_narrow_equidistant_top.csv",
+"top-narrow-equidistant/data_-0,5000_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_-0,5000_xtreme_narrow_equidistant_top.csv",
+"top-narrow-equidistant/data_-0,7500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_-0,7500_xtreme_narrow_equidistant_top.csv",
+"bottom-narrow-equidistant/data_0,0000_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,0000_xtreme_narrow_equidistant_bottom.csv",
+"bottom-narrow-equidistant/data_0,2500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,2500_xtreme_narrow_equidistant_bottom.csv",
+"bottom-narrow-equidistant/data_0,5000_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,5000_xtreme_narrow_equidistant_bottom.csv",
+"bottom-narrow-equidistant/data_0,7500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,7500_xtreme_narrow_equidistant_bottom.csv",
+"bottom-narrow-equidistant/data_-0,2500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_-0,2500_xtreme_narrow_equidistant_bottom.csv",
+"bottom-narrow-equidistant/data_-0,5000_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_-0,5000_xtreme_narrow_equidistant_bottom.csv",
+"bottom-narrow-equidistant/data_-0,7500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_-0,7500_xtreme_narrow_equidistant_bottom.csv"];
 let effectiveFiles;
 
 const attentionCheckFiles = ["attention-checks/data_0,7500_xtreme_narrow_uniform_top.csv",

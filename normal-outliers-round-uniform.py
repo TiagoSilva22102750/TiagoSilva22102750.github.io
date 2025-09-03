@@ -26,7 +26,7 @@ box_center_x = box_left + box_width / 2
 box_center_y = box_bottom + (box_top - box_bottom) / 2
 
 mean = [box_center_x, box_center_y]
-covariance = [[(box_width / 6) ** 2, 0], [0, (box_top / 6) ** 2]]
+covariance = [[0.5**2, 0], [0, 0.5**2]]
 
 n_outliers = 10
 
