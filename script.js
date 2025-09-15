@@ -1,5 +1,5 @@
 const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-const size = 650;
+const size = 700;
 const width = size - margin.left - margin.right;
 const height = size - margin.top - margin.bottom;
 
@@ -303,6 +303,8 @@ function renderScatterplot(index) {
   d3.select("#scatterPlot").selectAll("*").remove();
   updateProgressBar(); // Update progress bar when rendering new scatterplot
 
+  const pointsWidth = width * 1.5;
+
   d3.select("#scatterPlot").selectAll("*").remove();
   const data = scatterplotData[index].data;
   const svg = d3.select("#scatterPlot")
@@ -312,10 +314,11 @@ function renderScatterplot(index) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const xMax = Math.max(Math.abs(d3.min(data, d => d.x)), Math.abs(d3.max(data, d => d.x)));
+  const xExtent = d3.extent(data, d => d.x);
+  const xMax = Math.max(Math.abs(xExtent[0]), Math.abs(xExtent[1]));
   const xScale = d3.scaleLinear()
-    .domain([-xMax, xMax])  // Center the X axis at 0
-    .range([0, width]);
+    .domain([-xMax, xMax])
+    .range([5, pointsWidth]);
 
   const yScale = d3.scaleLinear()
     .domain([d3.min(data, d => d.y) - 10, d3.max(data, d => d.y) + 10])
