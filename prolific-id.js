@@ -1,16 +1,14 @@
 let timer;
-let countdownTime = 90;
+let countdownTime = 120;
 let startTime = 0.0;
 let timespent = 0.0;
 let timerStartTimestamp = null;
 
 let currentIndex = 0;
-let visibilityCount = 0;
 let testEnded = false;
 let navigatingToInitial = false;
 
 let restoringSession = false;
-let visibilityChangeHandled = false;
 let userIdInput = '';
 
 function setCookie(name, value, days = 1) {
@@ -26,24 +24,20 @@ function getCookie(name) {
 }
 
 function saveState() {
-  setCookie('visibilityCount', visibilityCount);
   setCookie('testEnded', testEnded);
   setCookie('currentIndex', currentIndex);
-  setCookie('countdownTime', countdownTime);
-  setCookie('timerStartTimestamp', timerStartTimestamp);
+  if (timerStartTimestamp) {
+    setCookie('timerStartTimestamp', timerStartTimestamp);
+  }
 }
 
 function loadState() {
-  const vCount = getCookie('visibilityCount');
   const ended = getCookie('testEnded');
   const idx = getCookie('currentIndex');
-  const savedTime = getCookie('countdownTime');
   const savedTimestamp = getCookie('timerStartTimestamp');
 
-  if (vCount) visibilityCount = Number(vCount);
   if (ended) testEnded = ended === 'true';
   if (idx) currentIndex = Number(idx);
-  if (savedTime) countdownTime = Number(savedTime);
   if (savedTimestamp) timerStartTimestamp = Number(savedTimestamp);
 }
 
@@ -69,6 +63,9 @@ window.addEventListener('load', () => {
 });
 
 function startStudy() {
+    clearTimerCookies();
+    document.cookie = 'visibilityCount=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+
     if (window.alertShown) return;
     window.alertShown = true;
 
@@ -80,19 +77,19 @@ function startStudy() {
       userIdInput.value = userIdInput.value.replace(/[^a-zA-Z0-9]/g, '');
     });
 
-    if (visibilityCount === 1) {
-      alert("If you switch tabs, refresh or minimize the window again, the test will end.");
-    } else if (visibilityCount > 1) {
-      endTest();
-    }
-
     // Check if the button already exists
     const existingButton = document.querySelector('.next-btn');
     if (existingButton) {
         return; // Exit if the button already exists
     }
 
+    let timerDisplay = document.createElement("div");
+    timerDisplay.id = "timer";
+    timerDisplay.classList.add("timer");
+    document.body.appendChild(timerDisplay);
+
     createStartButton();
+    startTimer();
 }
 
 function createStartButton() {
@@ -164,29 +161,51 @@ function createStartButton() {
     document.querySelector('.thank-you-card').appendChild(container);
 }
 
-function handleVisibilityChange() {
-  if (document.hidden) {
-    if (navigatingToInitial) {
-      return;
-    }
-
-    visibilityCount++;
-    setCookie('visibilityCount', visibilityCount);
-    saveState();
-
-    if (visibilityCount === 1) {
-      alert("If you switch tabs or minimize the window again, the test will end.");
-    } else if (visibilityCount > 1) {
-      endTest();
-    }
+function startTimer() {
+  // If no timestamp exists, set it now
+  if (!timerStartTimestamp) {
+    timerStartTimestamp = Date.now();
+    setCookie('timerStartTimestamp', timerStartTimestamp);
   }
+
+  // Compute remaining time
+  let elapsed = Math.floor((Date.now() - timerStartTimestamp) / 1000);
+  countdownTime = 120 - elapsed;
+
+  if (countdownTime <= 0) {
+    navigateToInitial(); // Timer finished
+    return;
+  }
+
+  updateTimerDisplay(countdownTime);
+  clearInterval(timer);
+
+  timer = setInterval(() => {
+    countdownTime--;
+    updateTimerDisplay(countdownTime);
+
+    if (countdownTime <= 0) {
+      clearInterval(timer);
+      navigateToInitial();
+    }
+
+    saveState(); // persist state each tick
+  }, 1000);
 }
+
+function updateTimerDisplay(time) {
+    const str = String(time).padStart(3, "0");
+
+    document.querySelector('#timer .tick:nth-child(1)').setAttribute('data-value', str[0]);
+    document.querySelector('#timer .tick:nth-child(2)').setAttribute('data-value', str[1]);
+    document.querySelector('#timer .tick:nth-child(3)').setAttribute('data-value', str[2]);
+}
+
 
 function navigateToInitial() {
   navigatingToInitial = true;
   clearTimerCookies();
 
-  setCookie('visibilityCount', visibilityCount);
   setCookie('testEnded', testEnded);
   setCookie('cameFromProlificID', 'true');
   window.location.replace("initial.html");
@@ -196,13 +215,10 @@ function endTest() {
   testEnded = true;
   clearTimerCookies();
 
-  setCookie('visibilityCount', visibilityCount);
   setCookie('testEnded', testEnded);
 
   window.location.replace("end.html");
 }
-
-document.addEventListener('visibilitychange', handleVisibilityChange);
 
 function handleBeforeUnload(event) {
   //if (visibilityCount > 1) {

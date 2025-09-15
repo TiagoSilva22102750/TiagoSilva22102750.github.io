@@ -120,10 +120,17 @@
         <script src="prolific-id.js"></script>
         <script src="https://d3js.org/d3.v7.min.js"></script>
         <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@pqina/flip@latest/dist/flip.min.js"></script>
     </head>
 
     <body onload="startStudy()">
         <div>
+            <div class="flip-timer" id="timer">
+                <div class="tick" data-value="1" data-view="flip"></div>
+                <div class="tick" data-value="2" data-view="flip"></div>
+                <div class="tick" data-value="0" data-view="flip"></div>
+            </div>
+
             <div class="thank-you-card">
                 <p>Please enter your Prolific ID in the box below:</p>
                 <form id="prolific-form">

@@ -44,12 +44,18 @@
         .thank-you-card p {
             font-size: 16px;
             color: #555;
+            margin-bottom: 10px;
+        }
+        .countdown {
+            font-size: 14px;
+            color: #777;
+            font-style: italic;
         }
         .watermark {
             position: fixed;
             bottom: 10px;
             right: 10px;
-            background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            background: rgba(0, 0, 0, 0.5);
             color: white;
             padding: 5px 10px;
             font-size: 12px;
@@ -72,6 +78,7 @@
     <div class="thank-you-card">
         <h1>Thank You!</h1>
         <p>We appreciate your participation in the test. Your effort means a lot!</p>
+        <p class="countdown"><b>Redirecting to Prolific in <span id="timer">5</span> seconds...</b></p>
     </div>
 
     <div class="watermark">
@@ -79,5 +86,19 @@
             Video by Wavebreak Media
         </a>
     </div>
+
+    <script>
+        let seconds = 5;
+        const timerElement = document.getElementById("timer");
+
+        const countdown = setInterval(() => {
+            seconds--;
+            timerElement.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(countdown);
+                window.location.replace("https://www.prolific.com/");
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
