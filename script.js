@@ -507,7 +507,7 @@ function renderScatterplot(index) {
 
     interactionLog.push({
       type: "final",
-      scatterplot: files[currentIndex],
+      scatterplot: getCurrentScatterplotFile(currentIndex),
       left: { start: dragData.left.start, end: dragData.left.end },
       right: { start: dragData.right.start, end: dragData.right.end },
       hoveredPoints: [...hoveredPoints]
