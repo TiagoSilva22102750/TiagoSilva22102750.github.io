@@ -127,6 +127,13 @@ function clearCookies() {
 }
 
 window.addEventListener('pageshow', (event) => {
+  const ended = getCookie('testEnded') === 'true';
+
+  if (ended) {
+    // User already finished → send them straight to end page
+    window.location.replace("end.html");
+    return;
+  }
   // This fires even on back navigation
   const cameFromIntermediate = getCookie('cameFromIntermediate');
   blockReentryIfAlreadyStarted();

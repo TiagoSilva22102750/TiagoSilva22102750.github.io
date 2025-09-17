@@ -90,6 +90,16 @@ function clearCookies() {
   });
 }
 
+window.addEventListener('pageshow', (event) => {
+  const ended = getCookie('testEnded') === 'true';
+
+  if (ended) {
+    // User already finished → send them straight to end page
+    window.location.replace("end.html");
+    return;
+  }
+});
+
 // Preload all images
 const preloadedImages = [];
 function preloadImages() {
