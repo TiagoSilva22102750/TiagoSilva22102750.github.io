@@ -274,5 +274,12 @@ function checkIfUserIdExists(userId) {
   });
 }
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    return false;
+  }
+});
+
 window.addEventListener('beforeunload', handleBeforeUnload);
 window.addEventListener('load', startStudy);

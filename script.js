@@ -749,5 +749,12 @@ function sendEventData(data) {
   });
 }
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    return false;
+  }
+});
+
 loadState();
 startDashboard();
