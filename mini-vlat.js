@@ -371,6 +371,7 @@ function handleBeforeUnload(event) {
 }
 
 function sendMiniVlatAnswerData(data) {
+  /*
   return fetch("http://193.136.128.108:5000/submit-minivlat-answer", {
     method: "POST",
     headers: {
@@ -384,6 +385,24 @@ function sendMiniVlatAnswerData(data) {
   })
   .catch(error => {
     console.error("Erro ao enviar os dados:", error);
+  });
+  */
+  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-minivlat-answer.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.json(); // Or res.text() if PHP returns plain text
+  })
+  .then(result => {
+    console.log("VLAT response:", result);
+    return result;
+  })
+  .catch(err => {
+    console.error("sendMiniVlatResponse error:", err);
+    throw err;
   });
 }
 

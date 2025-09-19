@@ -252,6 +252,7 @@ function showToast(message, duration = 5000) {
 }
 
 function sendUserData(data) {
+  /*=
   return fetch("http://193.136.128.108:5000/submit-user-data", {
     method: "POST",
     headers: {
@@ -266,9 +267,16 @@ function sendUserData(data) {
   .catch(error => {
     console.error("Erro ao enviar os dados:", error);
   });
+  */
+  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-user-data.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
 }
 
 function checkIfUserIdExists(userId) {
+  /*
   return fetch("http://193.136.128.108:5000/check-user-id", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -279,6 +287,26 @@ function checkIfUserIdExists(userId) {
   .catch(err => {
     alert("Error checking user ID:", err);
     return false;
+  });
+  */
+  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/check-user-id.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId })
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return res.json();
+  })
+  .then(data => {
+    // Make sure your PHP returns { "exists": true/false }
+    return data.exists === true;
+  })
+  .catch(err => {
+    console.error("Error checking user ID:", err);
+    return false; // fail safe: assume user does NOT exist if check fails
   });
 }
 

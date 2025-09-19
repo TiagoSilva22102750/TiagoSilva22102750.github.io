@@ -679,6 +679,7 @@ function handleBeforeUnload(event) {
 }
 
 function sendTrialData(data) {
+  /*
   return fetch("http://193.136.128.108:5000/submit-trial", {
     method: "POST",
     headers: {
@@ -693,9 +694,28 @@ function sendTrialData(data) {
   .catch(error => {
     console.error("Erro ao enviar os dados:", error);
   });
+  */
+  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-trial.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.json(); // Or res.text() if PHP returns plain text
+  })
+  .then(result => {
+    console.log("Trial response:", result);
+    return result;
+  })
+  .catch(err => {
+    console.error("sendTrialData error:", err);
+    throw err;
+  });
 }
 
 function sendEventData(data) {
+  /*
   return fetch("http://193.136.128.108:5000/submit-event", {
     method: "POST",
     headers: {
@@ -709,6 +729,24 @@ function sendEventData(data) {
   })
   .catch(error => {
     console.error("Erro ao enviar os dados:", error);
+  });
+  */
+  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-event.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.json(); // Or res.text()
+  })
+  .then(result => {
+    console.log("Event response:", result);
+    return result;
+  })
+  .catch(err => {
+    console.error("sendEventData error:", err);
+    throw err;
   });
 }
 
