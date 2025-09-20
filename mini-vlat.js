@@ -387,7 +387,7 @@ function sendMiniVlatAnswerData(data) {
     console.error("Erro ao enviar os dados:", error);
   });
   */
-  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-minivlat-answer.php", {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/submit-minivlat-answer.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)

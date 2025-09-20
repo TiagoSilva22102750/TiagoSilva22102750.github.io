@@ -739,7 +739,7 @@ function sendTrialData(data) {
     console.error("Erro ao enviar os dados:", error);
   });
   */
-  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-trial.php", {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/submit-trial.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -763,7 +763,7 @@ function sendEventData(data) {
     console.error("Erro ao enviar os dados:", error);
   });
   */
-  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-event.php", {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/submit-event.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)

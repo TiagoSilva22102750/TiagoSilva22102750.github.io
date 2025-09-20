@@ -268,7 +268,7 @@ function sendUserData(data) {
     console.error("Erro ao enviar os dados:", error);
   });
   */
-  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/submit-user-data.php", {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/submit-user-data.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -289,7 +289,7 @@ function checkIfUserIdExists(userId) {
     return false;
   });
   */
-  return fetch("https://web.tecnico.ulisboa.pt/ist1111187/check-user-id.php", {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/check-user-id.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId })
