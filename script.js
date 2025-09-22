@@ -299,7 +299,7 @@ function renderScatterplot(index) {
   const rightY = ballRightY !== null ? ballRightY : defaultY;
 
   if (testEnded) {
-    alert("The test has ended because you switched tabs or minimized the window too many times.");
+    alert("The test has ended because you switched tabs, refreshed or minimized the window too many times.");
     return;
   }
 
@@ -687,7 +687,7 @@ function handleVisibilityChange() {
     saveState();
 
     if (visibilityCount === 1) {
-      alert("If you switch tabs or minimize the window again, the test will end.");
+      alert("If you switch tabs, refresh or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
       behaviourEndTest();
     }

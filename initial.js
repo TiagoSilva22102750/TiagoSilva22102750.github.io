@@ -13,6 +13,7 @@ let restoringSession = false;
 let visibilityChangeHandled = false;
 let videoWatched = false;
 let userID = '';
+let inFullscreenChange = false;
 
 function setCookie(name, value, days = 1) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -222,7 +223,16 @@ function updateTimerDisplay(time) {
     document.querySelector('#timer .tick:nth-child(2)').setAttribute('data-value', String(units));
 }
 
+document.addEventListener("fullscreenchange", () => {
+  inFullscreenChange = true;
+  setTimeout(() => { inFullscreenChange = false; }, 200);
+});
+
 function handleVisibilityChange() {
+  if (inFullscreenChange) {
+    return;
+  }
+
   if (document.hidden) {
     if (navigatingToTestTrial) {
       return;
@@ -233,7 +243,7 @@ function handleVisibilityChange() {
     saveState();
 
     if (visibilityCount === 1) {
-      alert("If you switch tabs or minimize the window again, the test will end.");
+      alert("If you switch tabs, refresh or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
       behaviourEndTest();
     }

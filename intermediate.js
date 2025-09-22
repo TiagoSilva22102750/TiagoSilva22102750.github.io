@@ -228,7 +228,7 @@ function handleVisibilityChange() {
     saveState();
 
     if (visibilityCount === 1) {
-      alert("If you switch tabs or minimize the window again, the test will end.");
+      alert("If you switch tabs, refresh or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
       behaviourEndTest();
     }
