@@ -131,7 +131,7 @@ window.addEventListener('pageshow', (event) => {
 
   if (ended) {
     // User already finished → send them straight to end page
-    window.location.replace("end.html");
+    window.location.replace("behaviour_end.html");
     return;
   }
   // This fires even on back navigation
@@ -166,7 +166,7 @@ function startDashboard() {
   if (visibilityCount === 1 && navType === "reload" && !cameFromTestTrial) {
     alert("If you switch tabs, refresh or minimize the window again, the test will end.");
   } else if (visibilityCount > 1) {
-    endTest();
+    behaviourEndTest();
   }
 
   // Clear the flag after use
@@ -611,7 +611,7 @@ function renderScatterplot(index) {
       updateInstructions(currentIndex);
       renderScatterplot(currentIndex);
     } else if (currentIndex === scatterplotData.length - 1) {
-      endTest();
+      behaviourEndTest();
     }
   }
 
@@ -689,7 +689,7 @@ function handleVisibilityChange() {
     if (visibilityCount === 1) {
       alert("If you switch tabs or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
-      endTest();
+      behaviourEndTest();
     }
   }
 }
@@ -701,15 +701,21 @@ function navigateToIntermediate() {
   window.location.replace("intermediate.html");
 }
 
-function endTest() {
+function behaviourEndTest() {
   clearCookies();
   testEnded = true;
+
+  const userBehaviourData = {
+    user_id: userID,
+    visibilityCount: visibilityCount
+  };
 
   if (currentIndex == scatterplotData.length - 1) {
     navigateToIntermediate(); // Use safe navigation
   } else {
     setCookie('testEnded', testEnded);
-    window.location.replace("end.html"); // Normal navigation for other pages
+    sendUserBehaviourData(userBehaviourData);
+    window.location.replace("behaviour_end.html"); // Normal navigation for other pages
   }
 }
 
@@ -768,6 +774,26 @@ function sendEventData(data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   })
+}
+
+function sendUserBehaviourData(data) {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/submit-user-behaviour.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.json(); // Or res.text() if PHP returns plain text
+  })
+  .then(result => {
+    //console.log("Behaviour response:", result);
+    return result;
+  })
+  .catch(err => {
+    console.error("BehaviourData error:", err);
+    throw err;
+  });
 }
 
 document.addEventListener('keydown', (event) => {

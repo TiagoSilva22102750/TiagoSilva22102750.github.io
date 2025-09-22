@@ -5,6 +5,7 @@ let timerStartTimestamp = null;
 let currentIndex = 0;
 let visibilityCount = 0;
 let testEnded = false;
+let userID = '';
 
 function setCookie(name, value, days = 1) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -71,7 +72,7 @@ window.addEventListener('pageshow', (event) => {
 
   if (ended) {
     // User already finished → send them straight to end page
-    window.location.replace("end.html");
+    window.location.replace("behaviour_end.html");
     return;
   }
 
@@ -100,6 +101,7 @@ function startMiniVLAT() {
     loadState();
 
     const cameFromStudy = getCookie('cameFromStudy') === 'true';
+    userID = localStorage.getItem('prolificUserID');
 
     // Detect navigation type
     let navType = performance.getEntriesByType("navigation")[0]?.type || "navigate";
@@ -108,7 +110,7 @@ function startMiniVLAT() {
     if (visibilityCount === 1 && navType === "reload" && !cameFromStudy) {
       alert("If you switch tabs, refresh or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
-      endTest();
+      behaviourEndTest();
     }
 
     // Clear the flag after use
@@ -228,7 +230,7 @@ function handleVisibilityChange() {
     if (visibilityCount === 1) {
       alert("If you switch tabs or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
-      endTest();
+      behaviourEndTest();
     }
   }
 }
@@ -240,12 +242,18 @@ function navigateToMinivlat() {
   window.location.replace("mini-vlat.html");
 }
 
-function endTest() {
+function behaviourEndTest() {
   clearCookies();
   testEnded = true;
 
+  const userBehaviourData = {
+    user_id: userID,
+    visibilityCount: visibilityCount
+  };
+
+  sendUserBehaviourData(userBehaviourData);
   setCookie('testEnded', testEnded);
-  window.location.replace("end.html");
+  window.location.replace("behaviour_end.html");
 }
 
 document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -255,6 +263,26 @@ function handleBeforeUnload(event) {
     //event.preventDefault();
     //event.returnValue = 'The test will be finished if you leave the page now.';
   //}
+}
+
+function sendUserBehaviourData(data) {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/submit-user-behaviour.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.json(); // Or res.text() if PHP returns plain text
+  })
+  .then(result => {
+    //console.log("Behaviour response:", result);
+    return result;
+  })
+  .catch(err => {
+    console.error("BehaviourData error:", err);
+    throw err;
+  });
 }
 
 document.addEventListener('keydown', (event) => {

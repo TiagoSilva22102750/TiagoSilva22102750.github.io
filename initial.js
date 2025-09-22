@@ -69,7 +69,7 @@ window.addEventListener('load', () => {
 
   if (ended) {
     // User already finished → send them straight to end page
-    window.location.replace("end.html");
+    window.location.replace("behaviour_end.html");
     return;
   }
 
@@ -89,7 +89,7 @@ function startStudy() {
     if (visibilityCount === 1) {
       alert("If you switch tabs, refresh or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
-      endTest();
+      behaviourEndTest();
     }
 
     // Check if the button already exists
@@ -235,7 +235,7 @@ function handleVisibilityChange() {
     if (visibilityCount === 1) {
       alert("If you switch tabs or minimize the window again, the test will end.");
     } else if (visibilityCount > 1) {
-      endTest();
+      behaviourEndTest();
     }
   }
 }
@@ -250,14 +250,20 @@ function navigateToTestTrial() {
   window.location.replace("test-trial.html");
 }
 
-function endTest() {
+function behaviourEndTest() {
   testEnded = true;
   clearTimerCookies();
 
+  const userBehaviourData = {
+    user_id: userID,
+    visibilityCount: visibilityCount
+  };
+
+  sendUserBehaviourData(userBehaviourData);
   setCookie('visibilityCount', visibilityCount);
   setCookie('testEnded', testEnded);
 
-  window.location.replace("end.html");
+  window.location.replace("behaviour_end.html");
 }
 
 document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -283,6 +289,26 @@ function showToast(message, duration = 5000) {
   setTimeout(() => {
     toast.classList.remove('show');
   }, duration);
+}
+
+function sendUserBehaviourData(data) {
+  return fetch("//web.tecnico.ulisboa.pt/ist1111187/submit-user-behaviour.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.json(); // Or res.text() if PHP returns plain text
+  })
+  .then(result => {
+    //console.log("Behaviour response:", result);
+    return result;
+  })
+  .catch(err => {
+    console.error("BehaviourData error:", err);
+    throw err;
+  });
 }
 
 document.addEventListener('keydown', (event) => {

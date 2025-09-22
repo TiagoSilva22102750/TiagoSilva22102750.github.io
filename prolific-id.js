@@ -62,7 +62,7 @@ window.addEventListener('load', () => {
 
   if (ended) {
     // User already finished → send them straight to end page
-    window.location.replace("end.html");
+    window.location.replace("behaviour_end.html");
     return;
   }
 
@@ -219,13 +219,13 @@ function navigateToInitial() {
   window.location.replace("initial.html");
 }
 
-function endTest() {
+function behaviourEndTest() {
   testEnded = true;
   clearTimerCookies();
 
   setCookie('testEnded', testEnded);
 
-  window.location.replace("end.html");
+  window.location.replace("behaviour_end.html");
 }
 
 function handleBeforeUnload(event) {
