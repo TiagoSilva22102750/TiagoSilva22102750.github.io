@@ -3,20 +3,18 @@ const size = 700;
 const width = size - margin.left - margin.right;
 const height = size - margin.top - margin.bottom;
 
-const files = ["top-narrow-equidistant/data_0,0000_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,0000_xtreme_narrow_equidistant_top.csv",
-"top-narrow-equidistant/data_0,2500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,2500_xtreme_narrow_equidistant_top.csv",
-"top-narrow-equidistant/data_0,5000_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,5000_xtreme_narrow_equidistant_top.csv",
-"top-narrow-equidistant/data_0,7500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,7500_xtreme_narrow_equidistant_top.csv",
-"top-narrow-equidistant/data_-0,2500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_-0,2500_xtreme_narrow_equidistant_top.csv",
-"top-narrow-equidistant/data_-0,5000_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_-0,5000_xtreme_narrow_equidistant_top.csv",
-"top-narrow-equidistant/data_-0,7500_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_-0,7500_xtreme_narrow_equidistant_top.csv",
+const files = ["top-round-uniform/data_0,0000_normal_round_uniform_top.csv", "top-round-uniform/data_0,0000_extreme_round_uniform_top.csv",
+"top-round-equidistant/data_0,0000_normal_round_equidistant_top.csv", "top-round-equidistant/data_0,0000_extreme_round_equidistant_top.csv",
+"top-round-onespot/data_0,0000_normal_round_one-spot_top.csv", "top-round-onespot/data_0,0000_extreme_round_one-spot_top.csv",
+"top-narrow-uniform/data_0,0000_normal_narrow_uniform_top.csv", "top-narrow-uniform/data_0,0000_extreme_narrow_uniform_top.csv",
+"top-narrow-equidistant/data_0,0000_normal_narrow_equidistant_top.csv", "top-narrow-equidistant/data_0,0000_xtreme_narrow_equidistant_top.csv",
+"top-narrow-onespot/data_0,0000_normal_narrow_one-spot_top.csv", "top-narrow-onespot/data_0,0000_extreme_narrow_one-spot_top.csv",
+"bottom-round-uniform/data_0,0000_normal_round_uniform_bottom.csv", "bottom-round-uniform/data_0,0000_extreme_round_uniform_bottom.csv",
+"bottom-round-equidistant/data_0,0000_normal_round_equidistant_bottom.csv", "bottom-round-equidistant/data_0,0000_extreme_round_equidistant_bottom.csv",
+"bottom-round-onespot/data_0,0000_normal_round_one-spot_bottom.csv", "bottom-round-onespot/data_0,0000_extreme_round_one-spot_bottom.csv",
+"bottom-narrow-uniform/data_0,0000_normal_narrow_uniform_bottom.csv", "bottom-narrow-uniform/data_0,0000_extreme_narrow_uniform_bottom.csv",
 "bottom-narrow-equidistant/data_0,0000_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,0000_xtreme_narrow_equidistant_bottom.csv",
-"bottom-narrow-equidistant/data_0,2500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,2500_xtreme_narrow_equidistant_bottom.csv",
-"bottom-narrow-equidistant/data_0,5000_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,5000_xtreme_narrow_equidistant_bottom.csv",
-"bottom-narrow-equidistant/data_0,7500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_0,7500_xtreme_narrow_equidistant_bottom.csv",
-"bottom-narrow-equidistant/data_-0,2500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_-0,2500_xtreme_narrow_equidistant_bottom.csv",
-"bottom-narrow-equidistant/data_-0,5000_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_-0,5000_xtreme_narrow_equidistant_bottom.csv",
-"bottom-narrow-equidistant/data_-0,7500_normal_narrow_equidistant_bottom.csv", "bottom-narrow-equidistant/data_-0,7500_xtreme_narrow_equidistant_bottom.csv"];
+"bottom-narrow-onespot/data_0,0000_normal_narrow_one-spot_bottom.csv", "bottom-narrow-onespot/data_0,0000_extreme_narrow_one-spot_bottom.csv"];
 let effectiveFiles;
 
 const attentionCheckFiles = ["attention-checks/data_0,7500_xtreme_narrow_uniform_top.csv",
@@ -231,17 +229,17 @@ function updateInstructions(index) {
   if (type === "attentiontop") {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the red line, so that the value is <b>-1.00</b>.</p>
+      <p>Adjust the slope or position of the red line, so that the value is <b>-1.00</b>.</p>
     `;
   } else if (type === "attentionbottom") {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the red line, so that the value is <b>1.00</b>.</p>
+      <p>Adjust the slope or position of the red line, so that the value is <b>1.00</b>.</p>
     `;
   } else {
     instructionsDiv.innerHTML = `
       <h2>Instructions:</h2>
-      <p>Adjust the red line to reflect the trend you see in the scatterplot.</p>
+      <p>Adjust the slope or position of the red line.</p>
     `;
   }
 }
